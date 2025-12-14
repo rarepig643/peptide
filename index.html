@@ -1262,7 +1262,8 @@ function renderDailyTable() {
 
     pageItems.forEach(t => {
         const d = new Date(t);
-        const dateStr = `${d.getMonth() + 1}.${d.getDate()} (${getDayName(d.getDay())})`;
+        // [수정] 날짜 포맷에 년도 추가
+        const dateStr = `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()} (${getDayName(d.getDay())})`;
         const isToday = d.toDateString() === todayStr;
         const rowClass = isToday ? 'today-row' : '';
 
