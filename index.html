@@ -123,8 +123,9 @@
   }
 
   /* 조회 기간 설정 박스 */
+  /* 박스 내부 여백을 줄여서 입력 공간 확보 */
   .date-range-box {
-      background: #f1f3f5; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e9ecef;
+      background: #f1f3f5; padding: 12px 8px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e9ecef;
   }
   
   .range-header {
@@ -133,6 +134,7 @@
       justify-content: space-between; 
       align-items: center; 
       margin-bottom: 10px;
+      padding: 0 4px;
   }
   
   .range-title { 
@@ -146,8 +148,19 @@
       background: #6c757d; color: white; font-size: 0.8rem; padding: 6px 12px; height: auto; border-radius: 20px; width: auto; white-space: nowrap; flex-shrink: 0;
   }
 
-  .range-inputs { display: flex; gap: 5px; align-items: center; }
-  .btn-search { background: #36a2eb; color: white; flex: 0 0 55px; font-size: 0.9rem; border-radius: 8px; padding: 0; }
+  /* 수정된 부분: gap을 줄이고 글자 크기 조정 */
+  .range-inputs { display: flex; gap: 3px; align-items: center; }
+  
+  .range-inputs input[type="date"] {
+      flex: 1; 
+      min-width: 0; 
+      font-size: 13px; /* 글자 크기 축소 */
+      letter-spacing: -0.5px; /* 자간 축소 */
+      padding: 0; 
+      background: #fff;
+  }
+
+  .btn-search { background: #36a2eb; color: white; flex: 0 0 50px; font-size: 0.9rem; border-radius: 8px; padding: 0; }
 
   /* 보기 모드 토글 */
   .view-toggle-container { display: flex; background: #e9ecef; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
@@ -301,6 +314,12 @@
   input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: auto; border:none;}
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #36a2eb; cursor: pointer; margin-top: -8px; }
   input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #ddd; border-radius: 2px; }
+  
+  /* 필터 셀렉트 */
+  #historyFilter {
+      background: #f8f9fa; border:1px solid #ddd; font-weight:bold; color:#555;
+      height: 32px; font-size: 0.85rem; width: auto; text-align-last: center;
+  }
 </style>
 </head>
 <body>
@@ -381,11 +400,7 @@
       <table class="daily-table" id="dailyTable">
           <thead>
               <tr>
-                  <th style="width:25%">날짜</th>
-                  <th style="color:#36a2eb">터제</th>
-                  <th style="color:#ff6384">레타</th>
-                  <th style="color:#28a745">세마</th>
-              </tr>
+                  </tr>
           </thead>
           <tbody id="dailyTableBody"></tbody>
       </table>
@@ -393,9 +408,15 @@
   </div>
 
   <div id="historySection">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin:30px 0 10px;">
-          <h3 style="margin:0; font-size:1.1em; color:#555;">💉 투약 기록 관리</h3>
-          <div style="display:flex; gap:5px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:30px 0 10px; flex-wrap: wrap; gap: 10px;">
+          <h3 style="margin:0; font-size:1.1em; color:#555; white-space: nowrap;">💉 투약 기록 관리</h3>
+          <div style="display:flex; gap:5px; align-items:center;">
+              <select id="historyFilter" onchange="changeHistoryFilter()">
+                  <option value="all">전체</option>
+                  <option value="tirz">터제</option>
+                  <option value="reta">레타</option>
+                  <option value="sema">세마</option>
+              </select>
               <button class="btn-select-all" onclick="toggleSelectAll()">전체 선택</button>
               <button class="btn-del-sel" onclick="askMultiDel()">선택 삭제</button>
           </div>
@@ -563,6 +584,7 @@ function setDisplayType(type) {
         document.getElementById('chartArea').style.display = 'none';
         document.getElementById('chartTooltip').style.display = 'none'; 
         document.getElementById('listArea').style.display = 'block';
+        renderDailyTable();
     }
     update();
 }
@@ -837,25 +859,30 @@ function update() {
   renderDailyTable();
 }
 
-// [NEW] Checkbox toggle logic
 function toggleSelectAll() {
     const checkboxes = document.querySelectorAll('.history-chk');
     if (checkboxes.length === 0) return;
     
-    // Check if ALL are currently checked
     const allChecked = Array.from(checkboxes).every(cb => cb.checked);
     
-    // Toggle: if all checked -> uncheck all, else -> check all
     checkboxes.forEach(cb => {
         cb.checked = !allChecked;
     });
 }
 
+function changeHistoryFilter() {
+    currentHistoryPage = 1;
+    renderHistoryList();
+}
+
 function renderHistoryList() {
     const historyListEl = document.getElementById('historyList');
     historyListEl.innerHTML = '';
+    
+    // 상단 탭이 아닌, 하단 전용 필터를 사용하도록 수정
+    const filterVal = document.getElementById('historyFilter').value;
 
-    const filteredDoses = doses.filter(d => viewMode === 'all' || d.type === viewMode);
+    const filteredDoses = doses.filter(d => filterVal === 'all' || d.type === filterVal);
     const reversedDoses = [...filteredDoses].reverse();
 
     const totalItems = reversedDoses.length;
@@ -868,9 +895,19 @@ function renderHistoryList() {
     const pageItems = reversedDoses.slice(startIdx, endIdx);
 
     pageItems.forEach((d) => {
-        const dateStr = new Date(d.time).toLocaleString('ko-KR', {
-            year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
+        const dObj = new Date(d.time);
+        const year = dObj.getFullYear();
+        const month = dObj.getMonth() + 1;
+        const day = dObj.getDate();
+        const dayName = getDayName(dObj.getDay());
+        let hour = dObj.getHours();
+        const min = String(dObj.getMinutes()).padStart(2, '0');
+        const ampm = hour >= 12 ? '오후' : '오전';
+        hour = hour % 12;
+        hour = hour ? hour : 12; 
+        
+        // (요일)을 추가하고, 오전/오후 시간을 span으로 묶어 줄바꿈 방지
+        const dateStr = `${year}. ${month}. ${day}. (${dayName}) <span style="white-space:nowrap">${ampm} ${hour}:${min}</span>`;
         
         let label = '터제'; let tagClass = 'tirz';
         if(d.type === 'reta') { label = '레타'; tagClass = 'reta'; }
@@ -1041,7 +1078,7 @@ function drawChart() {
       }
   };
 
-  const tooltipOpacity = 0.8; // [MODIFIED] Fixed opacity, removed appSettings
+  const tooltipOpacity = 0.8;
   const tooltipBgColor = `rgba(0,0,0,${tooltipOpacity})`;
 
   let datasets = [];
@@ -1102,7 +1139,7 @@ function drawChart() {
         datalabels: { display: true },
         tooltip: {
           enabled: false, 
-          callbacks: { // Add title callback to get full date
+          callbacks: { 
               title: function(context) {
                   return fullDates[context[0].dataIndex];
               }
@@ -1119,8 +1156,17 @@ function drawChart() {
                   const titleLines = tooltipModel.title || [];
                   const bodyLines = tooltipModel.body.map(b => b.lines);
 
-                  // [NEW LOGIC] Find doses on this date
-                  const dateStr = titleLines[0]; // e.g. "2024. 12. 14."
+                  const dateStr = titleLines[0]; 
+                  
+                  // 오늘 날짜인지 확인하는 로직 추가
+                  const nowObj = new Date();
+                  const todayFormatted = `${nowObj.getFullYear()}. ${nowObj.getMonth()+1}. ${nowObj.getDate()}.`;
+                  
+                  let dateDisplay = dateStr;
+                  if(dateStr === todayFormatted) {
+                      dateDisplay += ' (오늘)';
+                  }
+
                   let doseInfoHtml = '';
                   doses.forEach(dose => {
                       const d = new Date(dose.time);
@@ -1135,8 +1181,7 @@ function drawChart() {
                       }
                   });
 
-                  let innerHtml = '<div class="tooltip-date">' + dateStr + '</div>';
-                  // [NEW] Doses container below date
+                  let innerHtml = '<div class="tooltip-date">' + dateDisplay + '</div>';
                   if(doseInfoHtml) {
                        innerHtml += '<div class="tooltip-doses">' + doseInfoHtml + '</div>';
                   }
@@ -1171,6 +1216,136 @@ function drawChart() {
   canvas.addEventListener('touchcancel', hideTooltip);
   canvas.addEventListener('mouseleave', hideTooltip);
   canvas.addEventListener('click', hideTooltip); 
+}
+
+function renderDailyTable() {
+    const tableHead = document.querySelector('#dailyTable thead tr');
+    const tbody = document.getElementById('dailyTableBody');
+    tbody.innerHTML = '';
+    
+    // 1. 헤더 생성 로직 (현재 viewMode에 따라)
+    let thHtml = '<th style="width:25%">날짜</th>';
+    if(viewMode === 'all' || viewMode === 'tirz') thHtml += '<th style="color:#36a2eb">터제</th>';
+    if(viewMode === 'all' || viewMode === 'reta') thHtml += '<th style="color:#ff6384">레타</th>';
+    if(viewMode === 'all' || viewMode === 'sema') thHtml += '<th style="color:#28a745">세마</th>';
+    tableHead.innerHTML = thHtml;
+
+    const sVal = document.getElementById('searchStart').value;
+    const eVal = document.getElementById('searchEnd').value;
+    const nowTs = new Date().getTime();
+
+    // 시작일/종료일 설정
+    let startTime = sVal ? new Date(sVal).getTime() : nowTs - (5 * 86400000);
+    let endTime = eVal ? new Date(eVal).getTime() : nowTs + (45 * 86400000);
+
+    // 데이터가 있고 검색 기간이 없으면 첫 데이터부터 시작
+    if(!sVal && doses.length > 0) startTime = doses[0].time;
+
+    // 날짜 배열 생성
+    let dateList = [];
+    for (let t = startTime; t <= endTime; t += 86400000) {
+        dateList.push(t);
+    }
+
+    // 페이지네이션 계산
+    const totalItems = dateList.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    if (currentPage > totalPages) currentPage = 1;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = startIdx + itemsPerPage;
+    const pageItems = dateList.slice(startIdx, endIdx);
+
+    const todayStr = new Date().toDateString();
+
+    pageItems.forEach(t => {
+        const d = new Date(t);
+        const dateStr = `${d.getMonth() + 1}.${d.getDate()} (${getDayName(d.getDay())})`;
+        const isToday = d.toDateString() === todayStr;
+        const rowClass = isToday ? 'today-row' : '';
+
+        // 각 약물 농도 계산
+        const valTirz = calculateTotalLevel(t, 'tirz').toFixed(2);
+        const valReta = calculateTotalLevel(t, 'reta').toFixed(2);
+        const valSema = calculateTotalLevel(t, 'sema').toFixed(2);
+
+        // 해당 날짜 투약 여부 확인
+        const dayDoses = doses.filter(dose => new Date(dose.time).toDateString() === d.toDateString());
+        
+        let tirzBadge = '', retaBadge = '', semaBadge = '';
+        
+        dayDoses.forEach(dose => {
+            if(dose.type === 'tirz') tirzBadge += `<span class="dose-badge">💉 ${dose.amt}mg</span>`;
+            if(dose.type === 'reta') retaBadge += `<span class="dose-badge">💉 ${dose.amt}mg</span>`;
+            if(dose.type === 'sema') semaBadge += `<span class="dose-badge">💉 ${dose.amt}mg</span>`;
+        });
+
+        const tr = document.createElement('tr');
+        tr.className = rowClass;
+
+        // 2. 바디 생성 로직 (현재 viewMode에 따라)
+        let rowHtml = `<td class="date-col">${dateStr}</td>`;
+        if(viewMode === 'all' || viewMode === 'tirz') rowHtml += `<td class="val-col" style="color:#36a2eb">${valTirz}${tirzBadge}</td>`;
+        if(viewMode === 'all' || viewMode === 'reta') rowHtml += `<td class="val-col" style="color:#ff6384">${valReta}${retaBadge}</td>`;
+        if(viewMode === 'all' || viewMode === 'sema') rowHtml += `<td class="val-col" style="color:#28a745">${valSema}${semaBadge}</td>`;
+        
+        tr.innerHTML = rowHtml;
+        tbody.appendChild(tr);
+    });
+
+    renderPagination(totalPages);
+}
+
+function getDayName(dayIdx) {
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    return days[dayIdx];
+}
+
+function renderPagination(totalPages) {
+    const container = document.getElementById('paginationControls');
+    container.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    // 이전 버튼
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'page-btn';
+    prevBtn.innerHTML = '‹';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => changePage(currentPage - 1);
+    container.appendChild(prevBtn);
+
+    // 페이지 번호
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+
+    if (endPage - startPage < 4) {
+        if (startPage === 1) endPage = Math.min(totalPages, startPage + 4);
+        else if (endPage === totalPages) startPage = Math.max(1, endPage - 4);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+        btn.innerText = i;
+        btn.onclick = () => changePage(i);
+        container.appendChild(btn);
+    }
+
+    // 다음 버튼
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'page-btn';
+    nextBtn.innerHTML = '›';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => changePage(currentPage + 1);
+    container.appendChild(nextBtn);
+}
+
+function changePage(page) {
+    currentPage = page;
+    renderDailyTable();
 }
 </script>
 </body>
