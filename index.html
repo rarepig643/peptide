@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>펩타이드 매니저 (날짜오류 완벽수정)</title>
+<title>펩타이드 매니저 (년도/색상 수정완료)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <style>
@@ -69,7 +69,7 @@
   .btn-add:hover { background: #218838; }
   .btn-now { background: #6c757d; flex: 0 0 50px; font-size: 13px; padding: 0; }
   
-  /* 상태 카드 보드 (세로 스택) */
+  /* 상태 카드 보드 */
   .status-board { 
       display: flex; 
       flex-direction: column; 
@@ -77,7 +77,7 @@
       margin: 10px 0 20px; 
   }
   
-  /* 상태 카드 (가로형 리스트 디자인) */
+  /* 상태 카드 */
   .status-card { 
       display: flex; 
       flex-direction: row; 
@@ -156,7 +156,39 @@
   .tab-btn.active { background: #333; color: white; border-color: #333; }
   
   /* 차트 영역 */
-  .chart-box { height: 350px; position: relative; margin-bottom: 20px; display: block; }
+  .chart-box { height: 300px; position: relative; margin-bottom: 0px; display: block; }
+  
+  /* 그래프 터치 시 페이지 스크롤 방지 */
+  canvas { touch-action: none; }
+
+  /* 상단 툴팁 박스 */
+  #chartTooltip {
+      background: #333;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px; 
+      min-height: 50px;
+      text-align: center;
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  .tooltip-date { font-weight: bold; margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; width: 100%; }
+  .tooltip-body { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; width: 100%; }
+  .tooltip-item { display: flex; align-items: center; gap: 6px; font-size: 0.95rem; }
+  
+  /* 네모 박스 스타일 */
+  .color-square { 
+      width: 12px; 
+      height: 12px; 
+      display: inline-block; 
+      border-radius: 2px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.5);
+  }
 
   /* 목록 영역 */
   .list-wrapper { display: none; }
@@ -194,10 +226,6 @@
   
   .btn-reset { width: 100%; background: #6c757d; margin-top: 20px; padding:0; border-radius:8px; color:white; border:none; font-weight:bold; height: 46px; }
   
-  .btn-settings-float { 
-      margin-top: 15px; width: 100%; background: #f8f9fa; border: 1px solid #ddd; color: #555; font-weight: bold; 
-  }
-
   /* 모달 */
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 9999; }
   .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
@@ -212,7 +240,7 @@
   
   .chk-label { display: flex; align-items: center; margin-bottom: 10px; font-size: 1rem; cursor: pointer; justify-content: flex-start; padding-left: 10px;}
   
-  /* 슬라이더 스타일 */
+  /* 슬라이더 */
   input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: auto; border:none;}
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #36a2eb; cursor: pointer; margin-top: -8px; }
   input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #ddd; border-radius: 2px; }
@@ -283,6 +311,10 @@
     <button class="tab-btn" id="btnSema" onclick="setViewMode('sema')" style="color:#28a745;">세마</button>
   </div>
 
+  <div id="chartTooltip">
+      <span style="color:#aaa;">그래프를 터치하면 상세 정보가 표시됩니다.</span>
+  </div>
+
   <div class="chart-box" id="chartArea">
     <canvas id="myChart"></canvas>
   </div>
@@ -309,24 +341,7 @@
       <div class="pagination-container" id="historyPaginationControls"></div>
   </div>
   
-  <button class="btn-settings-float" onclick="openSettingsModal()">⚙️ 설정 (투명도)</button>
   <button class="btn-reset" onclick="openResetModal()">🗑 데이터 초기화</button>
-</div>
-
-<div id="settingsModal" class="modal-overlay">
-  <div class="modal-box">
-    <div class="modal-title">⚙️ 설정</div>
-    <div style="text-align:left; margin-bottom:10px; font-weight:bold; color:#555;">그래프 툴팁 투명도</div>
-    <input type="range" id="opacityRange" min="0" max="1" step="0.1" value="0.8" oninput="updateOpacityDisplay(this.value)">
-    <div style="text-align:center; margin-bottom:20px; font-size:0.9em; color:#666;">
-        현재값: <span id="opacityVal">0.8</span>
-    </div>
-
-    <div class="modal-btns" style="margin-top:20px;">
-      <button class="btn-pop bg-gray" onclick="closeSettingsModal()">취소</button>
-      <button class="btn-pop bg-blue" onclick="saveSettings()">저장</button>
-    </div>
-  </div>
 </div>
 
 <div id="editModal" class="modal-overlay">
@@ -360,7 +375,7 @@
 
 <div id="resetModal" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-title" style="color:#dc3545;">⚠️ 데이터 초기화</div>
+    <div class="modal-title">⚠️ 데이터 초기화</div>
     <div style="text-align:left; padding: 10px;">
         <label class="chk-label"><input type="checkbox" id="checkTirz"> 🔵 터제파타이드</label>
         <label class="chk-label"><input type="checkbox" id="checkReta"> 🔴 레타트루타이드</label>
@@ -470,10 +485,12 @@ function setDisplayType(type) {
     if(type === 'chart') {
         document.getElementById('btnShowGraph').classList.add('active');
         document.getElementById('chartArea').style.display = 'block';
+        document.getElementById('chartTooltip').style.display = 'flex'; 
         document.getElementById('listArea').style.display = 'none';
     } else {
         document.getElementById('btnShowList').classList.add('active');
         document.getElementById('chartArea').style.display = 'none';
+        document.getElementById('chartTooltip').style.display = 'none'; 
         document.getElementById('listArea').style.display = 'block';
     }
     update();
@@ -634,21 +651,6 @@ function confirmReset() {
 
 function save() { localStorage.setItem('pep_history_final_v15', JSON.stringify(doses)); }
 
-function openSettingsModal() {
-    document.getElementById('opacityRange').value = appSettings.tooltipOpacity;
-    document.getElementById('opacityVal').innerText = appSettings.tooltipOpacity;
-    document.getElementById('settingsModal').style.display = 'flex';
-}
-function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
-function updateOpacityDisplay(val) { document.getElementById('opacityVal').innerText = val; }
-function saveSettings() {
-    const val = document.getElementById('opacityRange').value;
-    appSettings.tooltipOpacity = parseFloat(val);
-    localStorage.setItem('pep_settings_v1', JSON.stringify(appSettings));
-    update(); 
-    closeSettingsModal();
-}
-
 function calculateConcentration(dose, daysElapsed, type) {
   if (daysElapsed < 0) return 0;
   const { ke, ka, scale } = DRUG_CONSTANTS[type];
@@ -689,20 +691,12 @@ function calculateTotalLevel(targetTime, drugType) {
   return total;
 }
 
-// [수정] 현지 시간 기준 초기화 (UTC 오류 해결 적용)
 function initDateRange() {
     const now = new Date();
-    // 기본적으로 오늘부터 +45일
-    // 시작일은 데이터가 있으면 첫 투약일, 없으면 5일 전
     let startTs = now.getTime() - (5 * 86400000); 
-    
-    if (doses.length > 0) {
-        startTs = doses[0].time;
-    }
-    
+    if (doses.length > 0) startTs = doses[0].time;
     const endTs = now.getTime() + (45 * 86400000); 
 
-    // toISOString() 대신 로컬 시간 사용
     const sDate = new Date(startTs);
     const sYear = sDate.getFullYear();
     const sMonth = String(sDate.getMonth() + 1).padStart(2, '0');
@@ -716,7 +710,6 @@ function initDateRange() {
     document.getElementById('searchEnd').value = `${eYear}-${eMonth}-${eDay}`;
 }
 
-// [수정] 현지 시간 기준 날짜 변환 함수 (UTC 오류 해결 적용)
 function setFullRange() {
     let targetDoses = doses;
     if (viewMode !== 'all') {
@@ -1006,7 +999,7 @@ function drawChart() {
   for (let t = startTime; t <= endTime; t += 86400000) {
     const d = new Date(t);
     labels.push(`${d.getMonth()+1}.${d.getDate()}`); 
-    fullDates.push(`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`);
+    fullDates.push(`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`); // Full date
 
     dataTirz.push(calculateTotalLevel(t, 'tirz'));
     dataReta.push(calculateTotalLevel(t, 'reta'));
@@ -1042,9 +1035,6 @@ function drawChart() {
           return labelArr ? labelArr[context.dataIndex] : null;
       }
   };
-
-  const tooltipOpacity = appSettings.tooltipOpacity;
-  const tooltipBgColor = `rgba(0,0,0,${tooltipOpacity})`;
 
   let datasets = [];
   
@@ -1103,21 +1093,39 @@ function drawChart() {
         legend: { display: false },
         datalabels: { display: true },
         tooltip: {
-          enabled: true, mode: 'index', intersect: false, position: 'nearest',
-          backgroundColor: tooltipBgColor, 
-          titleFont: { size: 14 }, bodyFont: { size: 14 }, padding: 10, displayColors: true,
-          callbacks: {
+          enabled: false, 
+          callbacks: { // Add title callback to get full date
               title: function(context) {
-                  const index = context[0].dataIndex;
-                  return fullDates[index]; 
-              },
-              labelColor: function(context) {
-                  return {
-                      borderColor: context.dataset.borderColor,
-                      backgroundColor: context.dataset.borderColor,
-                      borderWidth: 2,
-                      borderRadius: 2,
-                  };
+                  return fullDates[context[0].dataIndex];
+              }
+          },
+          external: function(context) { 
+              let tooltipEl = document.getElementById('chartTooltip');
+              const tooltipModel = context.tooltip;
+              
+              if (tooltipModel.opacity === 0) {
+                  return; 
+              }
+
+              if (tooltipModel.body) {
+                  const titleLines = tooltipModel.title || [];
+                  const bodyLines = tooltipModel.body.map(b => b.lines);
+
+                  let innerHtml = '<div class="tooltip-date">' + titleLines[0] + '</div>';
+                  innerHtml += '<div class="tooltip-body">';
+                  
+                  bodyLines.forEach((body, i) => {
+                      // [FIX] Use dataset.borderColor for correct color
+                      const dataIndex = tooltipModel.dataPoints[i].datasetIndex;
+                      const dataset = context.chart.data.datasets[dataIndex];
+                      const color = dataset.borderColor;
+                      const style = 'background:' + color + ';';
+                      const span = '<span class="color-square" style="' + style + '"></span>';
+                      innerHtml += '<div class="tooltip-item">' + span + body + '</div>';
+                  });
+                  innerHtml += '</div>';
+
+                  tooltipEl.innerHTML = innerHtml;
               }
           }
         }
