@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>펩타이드 매니저 (년도/색상 수정완료)</title>
+<title>펩타이드 매니저</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <style>
@@ -53,6 +53,14 @@
       background: none !important;
       border: none !important;
       padding: 0 !important;
+  }
+  
+  /* 기록 리스트용 체크박스 스타일 */
+  .history-chk {
+      width: 20px !important; 
+      height: 20px !important; 
+      margin-right: 15px !important;
+      accent-color: #dc3545; /* 삭제용이라 빨간색 계열 */
   }
 
   select#drugType { flex: 2; background: #f9f9f9; font-weight: bold; text-align-last: center; min-width: 0; }
@@ -177,7 +185,28 @@
       align-items: center;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
-  .tooltip-date { font-weight: bold; margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; width: 100%; }
+  .tooltip-date { font-weight: bold; margin-bottom: 6px; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; width: 100%; }
+  
+  .tooltip-doses {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px; 
+      width: 100%;
+      flex-wrap: wrap;
+  }
+  
+  .tooltip-dose-badge {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: #ffda44;
+      font-weight: bold;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
   .tooltip-body { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; width: 100%; }
   .tooltip-item { display: flex; align-items: center; gap: 6px; font-size: 0.95rem; }
   
@@ -226,6 +255,34 @@
   
   .btn-reset { width: 100%; background: #6c757d; margin-top: 20px; padding:0; border-radius:8px; color:white; border:none; font-weight:bold; height: 46px; }
   
+  /* 선택 삭제 버튼 스타일 */
+  .btn-del-sel {
+      background: #dc3545; 
+      color: white; 
+      border: none; 
+      padding: 5px 10px; 
+      border-radius: 5px; 
+      font-size: 0.85rem; 
+      font-weight: bold; 
+      cursor: pointer;
+  }
+
+  /* 전체 선택 버튼 스타일 */
+  .btn-select-all {
+      background: #6c757d; 
+      color: white; 
+      border: none; 
+      padding: 5px 10px; 
+      border-radius: 5px; 
+      font-size: 0.85rem; 
+      font-weight: bold; 
+      cursor: pointer;
+  }
+  
+  .btn-settings-float { 
+      margin-top: 15px; width: 100%; background: #f8f9fa; border: 1px solid #ddd; color: #555; font-weight: bold; 
+  }
+
   /* 모달 */
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 9999; }
   .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
@@ -336,7 +393,13 @@
   </div>
 
   <div id="historySection">
-      <h3 style="margin:30px 0 10px; font-size:1.1em; color:#555;">💉 투약 기록 관리</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:30px 0 10px;">
+          <h3 style="margin:0; font-size:1.1em; color:#555;">💉 투약 기록 관리</h3>
+          <div style="display:flex; gap:5px;">
+              <button class="btn-select-all" onclick="toggleSelectAll()">전체 선택</button>
+              <button class="btn-del-sel" onclick="askMultiDel()">선택 삭제</button>
+          </div>
+      </div>
       <div class="history-box" id="historyList"></div>
       <div class="pagination-container" id="historyPaginationControls"></div>
   </div>
@@ -359,8 +422,16 @@
 <div id="recordEditModal" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-title">기록 수정</div>
+    <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#555;">약물 종류</div>
+    <select id="editRecordType" class="modal-input" style="background:#f9f9f9; text-align-last: center; font-weight:bold;">
+        <option value="tirz">터제파타이드</option>
+        <option value="reta">레타트루타이드</option>
+        <option value="sema">세마글루타이드</option>
+    </select>
+    
     <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#555;">용량 (mg)</div>
     <input type="number" id="editRecordAmt" class="modal-input" step="0.1">
+    
     <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#555;">날짜 및 시간</div>
     <div class="date-time-group" style="margin-bottom:0;">
         <input type="date" id="editRecordDate" class="modal-input" style="margin-bottom:0;" oninput="checkDate(this)">
@@ -375,7 +446,7 @@
 
 <div id="resetModal" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-title">⚠️ 데이터 초기화</div>
+    <div class="modal-title" style="color:#dc3545;">⚠️ 데이터 초기화</div>
     <div style="text-align:left; padding: 10px;">
         <label class="chk-label"><input type="checkbox" id="checkTirz"> 🔵 터제파타이드</label>
         <label class="chk-label"><input type="checkbox" id="checkReta"> 🔴 레타트루타이드</label>
@@ -404,7 +475,6 @@
 Chart.register(ChartDataLabels);
 
 let doses = JSON.parse(localStorage.getItem('pep_history_final_v15')) || [];
-let appSettings = JSON.parse(localStorage.getItem('pep_settings_v1')) || { tooltipOpacity: 0.8 };
 
 const ctx = document.getElementById('myChart').getContext('2d');
 let myChart;
@@ -413,6 +483,7 @@ let viewMode = 'all';
 let displayType = 'chart'; 
 let deleteTargetId = null; 
 let editTargetId = null; 
+let deleteTargetIds = []; 
 
 let currentPage = 1;
 let currentHistoryPage = 1; 
@@ -582,6 +653,9 @@ function openRecordEditModal(id) {
   const record = doses.find(d => d.id === id);
   if (!record) return;
   
+  const typeSelect = document.getElementById('editRecordType');
+  if(typeSelect) typeSelect.value = record.type;
+
   document.getElementById('editRecordAmt').value = record.amt;
   
   const d = new Date(record.time);
@@ -608,6 +682,7 @@ function saveRecordEdit() {
   const targetIndex = doses.findIndex(d => d.id === editTargetId);
   if (targetIndex === -1) return;
 
+  const newType = document.getElementById('editRecordType').value; 
   const amt = parseFloat(document.getElementById('editRecordAmt').value);
   let dDate = document.getElementById('editRecordDate').value;
   let dTime = document.getElementById('editRecordTime').value;
@@ -619,6 +694,7 @@ function saveRecordEdit() {
   
   const timestamp = new Date(`${dDate}T${dTime}`).getTime();
   
+  doses[targetIndex].type = newType;
   doses[targetIndex].amt = amt;
   doses[targetIndex].time = timestamp;
   
@@ -761,6 +837,20 @@ function update() {
   renderDailyTable();
 }
 
+// [NEW] Checkbox toggle logic
+function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll('.history-chk');
+    if (checkboxes.length === 0) return;
+    
+    // Check if ALL are currently checked
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    // Toggle: if all checked -> uncheck all, else -> check all
+    checkboxes.forEach(cb => {
+        cb.checked = !allChecked;
+    });
+}
+
 function renderHistoryList() {
     const historyListEl = document.getElementById('historyList');
     historyListEl.innerHTML = '';
@@ -790,7 +880,10 @@ function renderHistoryList() {
         
         historyListEl.innerHTML += `
           <div class="list-item">
-            <div>
+            <div style="display:flex; align-items:center; margin-right:10px;">
+                <input type="checkbox" class="history-chk" value="${d.id}">
+            </div>
+            <div style="flex-grow:1;">
               <span class="tag ${tagClass}">${label}</span>
               <strong>${d.amt} mg</strong> ${manualTag}
               <div style="color:#888; font-size:0.85em; margin-top:4px;">${dateStr}</div>
@@ -847,118 +940,27 @@ function changeHistoryPage(page) {
     renderHistoryList(); 
 }
 
-function renderDailyTable() {
-  const tableBody = document.getElementById('dailyTableBody');
-  tableBody.innerHTML = '';
-
-  const todayStr = new Date().toDateString();
-  const sVal = document.getElementById('searchStart').value;
-  const eVal = document.getElementById('searchEnd').value;
-  const nowTs = new Date().getTime();
-  
-  let startTime = sVal ? new Date(sVal).getTime() : nowTs - (5 * 86400000);
-  let endTime = eVal ? new Date(eVal).getTime() : nowTs + (45 * 86400000);
-  if(!sVal && doses.length > 0) startTime = doses[0].time;
-
-  let allRows = [];
-  for (let t = startTime; t <= endTime; t += 86400000) {
-      const d = new Date(t);
-      const isToday = d.toDateString() === todayStr;
-      
-      const valT = calculateTotalLevel(t, 'tirz');
-      const valR = calculateTotalLevel(t, 'reta');
-      const valS = calculateTotalLevel(t, 'sema');
-      
-      const showT = (viewMode === 'all' || viewMode === 'tirz');
-      const showR = (viewMode === 'all' || viewMode === 'reta');
-      const showS = (viewMode === 'all' || viewMode === 'sema');
-
-      const doseT = doses.find(dd => dd.type === 'tirz' && new Date(dd.time).toDateString() === d.toDateString());
-      const doseR = doses.find(dd => dd.type === 'reta' && new Date(dd.time).toDateString() === d.toDateString());
-      const doseS = doses.find(dd => dd.type === 'sema' && new Date(dd.time).toDateString() === d.toDateString());
-
-      const getCellHtml = (val, dose) => {
-          if (val < 0.01 && !dose) return '-';
-          let html = val.toFixed(2);
-          if (dose) html += `<span class="dose-badge">💉 ${dose.amt}</span>`;
-          return html;
-      };
-
-      const rowClass = isToday ? 'today-row' : '';
-      const dateText = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`; 
-
-      allRows.push(`
-        <tr class="${rowClass}">
-            <td class="date-col">${dateText}</td>
-            <td class="val-col" style="color:#36a2eb">${showT ? getCellHtml(valT, doseT) : '-'}</td>
-            <td class="val-col" style="color:#ff6384">${showR ? getCellHtml(valR, doseR) : '-'}</td>
-            <td class="val-col" style="color:#28a745">${showS ? getCellHtml(valS, doseS) : '-'}</td>
-        </tr>
-      `);
-  }
-
-  const totalItems = allRows.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  if(currentPage > totalPages) currentPage = 1;
-
-  const startIdx = (currentPage - 1) * itemsPerPage;
-  const endIdx = startIdx + itemsPerPage;
-  const currentRows = allRows.slice(startIdx, endIdx);
-
-  tableBody.innerHTML = currentRows.join('');
-  renderPagination(totalPages);
-}
-
-function renderPagination(totalPages) {
-    const container = document.getElementById('paginationControls');
-    container.innerHTML = '';
-    
-    if (totalPages <= 1) return;
-
-    const prevBtn = document.createElement('button');
-    prevBtn.className = 'page-btn';
-    prevBtn.innerHTML = '‹';
-    prevBtn.disabled = currentPage === 1;
-    prevBtn.onclick = () => changePage(currentPage - 1);
-    container.appendChild(prevBtn);
-
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, currentPage + 2);
-    
-    if (endPage - startPage < 4) {
-        if (startPage === 1) endPage = Math.min(totalPages, startPage + 4);
-        else if (endPage === totalPages) startPage = Math.max(1, endPage - 4);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-        const btn = document.createElement('button');
-        btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
-        btn.innerText = i;
-        btn.onclick = () => changePage(i);
-        container.appendChild(btn);
-    }
-
-    const nextBtn = document.createElement('button');
-    nextBtn.className = 'page-btn';
-    nextBtn.innerHTML = '›';
-    nextBtn.disabled = currentPage === totalPages;
-    nextBtn.onclick = () => changePage(currentPage + 1);
-    container.appendChild(nextBtn);
-}
-
-function changePage(page) {
-    currentPage = page;
-    renderDailyTable(); 
-}
-
 function askDel(id) {
     deleteTargetId = id;
+    deleteTargetIds = []; 
+    document.getElementById('singleDelModal').style.display = 'flex';
+}
+
+function askMultiDel() {
+    const checkboxes = document.querySelectorAll('.history-chk:checked');
+    if (checkboxes.length === 0) {
+        alert("삭제할 항목을 선택해주세요.");
+        return;
+    }
+    deleteTargetId = null;
+    deleteTargetIds = Array.from(checkboxes).map(cb => parseFloat(cb.value));
     document.getElementById('singleDelModal').style.display = 'flex';
 }
 
 function closeSingleDelModal() {
     document.getElementById('singleDelModal').style.display = 'none';
     deleteTargetId = null;
+    deleteTargetIds = [];
 }
 
 function confirmSingleDel() {
@@ -966,10 +968,13 @@ function confirmSingleDel() {
         const idx = doses.findIndex(d => d.id === deleteTargetId);
         if (idx !== -1) {
             doses.splice(idx, 1);
-            save();
-            update();
         }
+    } else if (deleteTargetIds.length > 0) {
+        doses = doses.filter(d => !deleteTargetIds.includes(d.id));
     }
+    
+    save();
+    update();
     closeSingleDelModal();
 }
 
@@ -999,7 +1004,7 @@ function drawChart() {
   for (let t = startTime; t <= endTime; t += 86400000) {
     const d = new Date(t);
     labels.push(`${d.getMonth()+1}.${d.getDate()}`); 
-    fullDates.push(`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`); // Full date
+    fullDates.push(`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`);
 
     dataTirz.push(calculateTotalLevel(t, 'tirz'));
     dataReta.push(calculateTotalLevel(t, 'reta'));
@@ -1035,6 +1040,9 @@ function drawChart() {
           return labelArr ? labelArr[context.dataIndex] : null;
       }
   };
+
+  const tooltipOpacity = 0.8; // [MODIFIED] Fixed opacity, removed appSettings
+  const tooltipBgColor = `rgba(0,0,0,${tooltipOpacity})`;
 
   let datasets = [];
   
@@ -1111,11 +1119,31 @@ function drawChart() {
                   const titleLines = tooltipModel.title || [];
                   const bodyLines = tooltipModel.body.map(b => b.lines);
 
-                  let innerHtml = '<div class="tooltip-date">' + titleLines[0] + '</div>';
+                  // [NEW LOGIC] Find doses on this date
+                  const dateStr = titleLines[0]; // e.g. "2024. 12. 14."
+                  let doseInfoHtml = '';
+                  doses.forEach(dose => {
+                      const d = new Date(dose.time);
+                      const dStr = `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`;
+                      if (dStr === dateStr) {
+                          let name = '';
+                          if (dose.type === 'tirz') name = '터제';
+                          else if (dose.type === 'reta') name = '레타';
+                          else if (dose.type === 'sema') name = '세마';
+                          
+                          doseInfoHtml += `<span class="tooltip-dose-badge">💉 ${name} ${dose.amt}mg</span>`;
+                      }
+                  });
+
+                  let innerHtml = '<div class="tooltip-date">' + dateStr + '</div>';
+                  // [NEW] Doses container below date
+                  if(doseInfoHtml) {
+                       innerHtml += '<div class="tooltip-doses">' + doseInfoHtml + '</div>';
+                  }
+
                   innerHtml += '<div class="tooltip-body">';
                   
                   bodyLines.forEach((body, i) => {
-                      // [FIX] Use dataset.borderColor for correct color
                       const dataIndex = tooltipModel.dataPoints[i].datasetIndex;
                       const dataset = context.chart.data.datasets[dataIndex];
                       const color = dataset.borderColor;
