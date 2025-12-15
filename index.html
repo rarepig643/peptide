@@ -3,100 +3,603 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>펩타이드 매니저</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>펩타이드 & 체중 통합 매니저 (DB연동_최종)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <style>
-  /* ================= [스타일 유지: index1.html 원본 그대로] ================= */
-  * { box-sizing: border-box; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-  body { background: #f4f7f6; margin: 0; padding: 20px; color: #333; padding-bottom: 80px; }
-  .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto; }
-  h2, h3 { text-align: center; margin-top: 0; color: #333; }
-  input, select, button { width: 100%; height: 45px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; text-align: center; }
-  button { background: #333; color: white; font-weight: bold; border: none; cursor: pointer; }
-  .row { display: flex; gap: 5px; }
-  .card { padding: 15px; border-radius: 10px; color: white; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-  .bg-blue { background: #36a2eb; } .bg-red { background: #ff6384; } .bg-green { background: #28a745; } .bg-purple { background: #6610f2; }
-  .login-box { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7f6; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
-  .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: white; display: flex; border-top: 1px solid #eee; z-index: 100; }
-  .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; color: #aaa; cursor: pointer;}
-  .nav-item.active { color: #333; font-weight: bold; }
-  .page { display: none; } .page.active { display: block; }
-  .list-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
-  .del-btn { width: auto; height: auto; padding: 5px 10px; background: #dc3545; font-size: 12px; margin: 0; }
-  
-  /* 알림창 등 스타일 보정 */
+  /* ================= [기존 스타일 100% 유지] ================= */
+  * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", sans-serif; box-sizing: border-box; }
+  input, select { -webkit-user-select: auto; user-select: auto; }
+  body { padding: 20px; background: #f4f7f6; max-width: 800px; margin: 0 auto; touch-action: manipulation; color: #333; padding-bottom: 90px; }
+  .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;}
+  h2 { text-align: center; color: #333; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+  select, input, button { padding: 0 5px; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; height: 46px; line-height: normal; text-align: center; background: white; -webkit-appearance: none; }
   input:focus, select:focus { outline: none; border-color: #333; }
+  button { cursor: pointer; color: white; border: none; font-weight: bold; transition: 0.2s; }
+  .btn-add { background: #28a745; width: 100%; margin-bottom: 20px; font-size: 1.1rem; }
+  .btn-reset { width: 100%; background: #6c757d; margin-top: 20px; padding:0; border-radius:8px; color:white; border:none; font-weight:bold; height: 46px; font-size: 1rem; }
+  .input-group { display: flex; gap: 8px; margin-bottom: 10px; width: 100%; }
+  .date-time-group { display: flex; gap: 5px; width: 100%; margin-bottom: 15px; }
+  input[type="date"], input[type="time"] { flex: 1; padding: 0; justify-content: center; display: flex; align-items: center; }
+  .btn-now { background: #6c757d; flex: 0 0 50px; font-size: 13px; padding: 0; }
+  select#drugType { flex: 1.6; width: 0; background: #f9f9f9; font-weight: bold; text-align-last: center; min-width: 0; color: #36a2eb; }
+  input#doseAmt { flex: 1; width: 0; min-width: 0; }
+  input[type="checkbox"] { -webkit-appearance: checkbox !important; appearance: checkbox !important; width: 24px !important; height: 24px !important; margin-right: 10px; vertical-align: middle; background: none !important; border: 1px solid #ddd !important; cursor: pointer; }
+  .history-chk { width: 20px !important; height: 20px !important; margin-right: 15px !important; accent-color: #dc3545; }
+  .status-board { display: flex; flex-direction: column; gap: 10px; margin: 10px 0 20px; }
+  .status-card { display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; border-radius: 12px; text-align: left; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 100%; }
+  .drug-name { font-size: 1rem; font-weight: bold; margin-bottom: 0; flex: 1; }
+  .current-val { font-size: 1.4rem; font-weight: bold; margin: 0 15px; white-space: nowrap; }
+  .unit { font-size: 0.6em; font-weight: normal; }
+  .edit-btn { background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; height: auto; white-space: nowrap; }
+  .card-tirz { background: linear-gradient(90deg, #36a2eb, #0056b3); } 
+  .card-reta { background: linear-gradient(90deg, #ff6384, #c82333); } 
+  .card-sema { background: linear-gradient(90deg, #28a745, #1e7e34); } 
+  .card-weight-cur { background: linear-gradient(90deg, #6610f2, #490bc4); }
+  .card-weight-goal { background: linear-gradient(90deg, #fd7e14, #d96200); }
+  .card-weight-bmi { background: linear-gradient(90deg, #20c997, #158c68); }
+  .card-bmi-calc { background: linear-gradient(90deg, #17a2b8, #117a8b); } 
+  .card-bmr-calc { background: linear-gradient(90deg, #e83e8c, #d63384); }
+  .date-range-box { background: #f8f9fa; padding: 12px 10px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #eee; }
+  .range-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 2px; }
+  .range-title { font-size: 0.95rem; font-weight: bold; color: #555; }
+  .btn-full-range { background: #6c757d; color: white; font-size: 0.8rem; padding: 6px 12px; height: auto; border-radius: 20px; width: auto; }
+  .range-inputs { display: flex; gap: 5px; align-items: center; }
+  .range-inputs input[type="date"] { font-size: 13px; background: #fff; flex: 1; height: 40px; }
+  .btn-search { background: #36a2eb; color: white; flex: 0 0 50px; font-size: 0.9rem; border-radius: 8px; padding: 0; height: 40px; }
+  .btn-search-weight { background: #6610f2 !important; }
+  .view-toggle-container { display: flex; background: #e9ecef; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
+  .view-btn { flex: 1; background: transparent; color: #666; border: none; font-size: 0.95rem; height: 40px; border-radius: 8px; font-weight: bold; }
+  .view-btn.active { background: white; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .tab-container { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; }
+  .tab-btn { padding: 0 12px; border-radius: 20px; border: 1px solid #ddd; background: #f8f9fa; color: #555; font-size: 0.9em; font-weight: bold; transition: 0.2s; flex: 1; max-width: 100px; height: 36px; line-height: 34px; white-space: nowrap; }
+  .tab-btn.active { background: #333; color: white; border-color: #333; }
+  .chart-box { height: 300px; position: relative; margin-bottom: 0px; display: block; }
+  canvas { touch-action: none; }
+  .chart-tooltip-custom { background: #333; color: white; padding: 12px; border-radius: 8px; margin-bottom: 10px; min-height: 50px; text-align: center; font-size: 0.9rem; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s ease; }
+  .list-wrapper { display: none; }
+  .daily-table { width: 100%; border-collapse: collapse; margin-top:10px; margin-bottom: 10px; font-size: 0.9rem; table-layout: fixed; }
+  .daily-table th { background: #f8f9fa; padding: 12px 5px; color: #555; font-weight: bold; border-bottom: 2px solid #eee; text-align: center; }
+  .daily-table td { padding: 14px 5px; border-bottom: 1px solid #f0f0f0; text-align: center; vertical-align: middle; color: #666; }
+  .daily-table .today-row { background-color: #fff9c4; font-weight: bold; border-left: 3px solid #ffc107; border-right: 3px solid #ffc107; }
+  .daily-table .today-row td { color: #333; }
+  .val-col { font-weight: bold; font-size: 0.95em; line-height: 1.2; }
+  .date-col { color: #666; font-size: 0.9em; letter-spacing: -0.5px; }
+  .dose-badge { display: block; font-size: 0.75em; color: #dc3545; font-weight: normal; margin-top: 2px; }
+  .weight-text-lg { color: #6610f2; font-weight: bold; font-size: 1.2em; }
+  .pagination-container { display: flex; justify-content: center; gap: 5px; margin-top: 20px; margin-bottom: 30px; }
+  .page-btn { min-width: 32px; height: 32px; padding: 0 5px; border-radius: 5px; border: 1px solid #ddd; background: white; color: #555; font-size: 0.9em; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+  .page-btn.active { background: #333; color: white; border-color: #333; }
+  .page-btn:disabled { opacity: 0.5; cursor: default; }
+  .full-history-section { margin-top: 40px; padding-top: 20px; border-top: 4px solid #f4f7f6; }
+  .history-header { display:flex; justify-content:space-between; align-items:center; margin:10px 0; flex-wrap: wrap; gap: 10px; }
+  .history-box { border-top: 2px solid #eee; padding-top: 10px; }
+  .list-item { display: flex; justify-content: space-between; padding: 15px 5px; border-bottom: 1px solid #f0f0f0; align-items: center; }
+  .tag { padding: 4px 8px; border-radius: 4px; color: white; font-size: 0.8em; margin-right: 10px; font-weight: bold; }
+  .tag.tirz { background: #36a2eb; } .tag.reta { background: #ff6384; } .tag.sema { background: #28a745; } .tag.weight { background: #6610f2; }
+  .manual-tag { color: #dc3545; font-size: 0.75em; margin-left: 5px; font-weight: bold; }
+  .action-group { display: flex; gap: 10px; }
+  .list-btn { background: none; border: none; font-size: 1.4em; padding: 8px; color: #aaa; cursor: pointer; height: auto; min-width: 30px; }
+  .btn-del-sel { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; height: 36px;}
+  .btn-select-all { background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; height: 36px;}
+  #historyFilter { background: #f8f9fa; border:1px solid #ddd; font-weight:bold; color:#555; height: 36px; font-size: 0.85rem; width: auto; text-align-last: center; }
+  .calc-sub-title { font-size: 1rem; font-weight: bold; color: #555; margin: 20px 0 10px 0; display: flex; align-items: center; }
+  .calc-sub-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background: #27ae60; margin-right: 8px; border-radius: 2px; }
+  .calc-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 10px; }
+  @media (min-width: 600px) { .calc-grid { grid-template-columns: repeat(2, 1fr); } }
+  .calc-group { background: #fafafa; padding: 15px; border-radius: 10px; border: 1px solid #eee; }
+  .input-label { font-size: 0.9rem; color: #666; font-weight: 600; margin-bottom: 8px; display: block; text-align: left; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .pill { padding: 0 12px; border-radius: 20px; border: 1px solid #ddd; background: #f8f9fa; color: #555; font-size: 0.9em; font-weight: bold; flex: 1; height: 36px; line-height: 34px; white-space: nowrap; cursor: pointer; text-align: center; }
+  .pill.active { background: #333; color: white; border-color: #333; }
+  .calc-input { width: 100%; font-size: 16px; height: 46px; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: white; margin-bottom: 5px;}
+  .calc-select { width: 100%; font-size: 16px; height: 46px; border: 1px solid #ddd; border-radius: 8px; text-align: center; text-align-last: center; background: white; margin-bottom: 5px; -webkit-appearance: none; font-weight: bold; color: #36a2eb; }
+  .muted-text { font-size: 0.85em; color: #27ae60; margin-top: 4px; font-weight: bold; text-align: center; min-height: 1.2em;}
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; border-top: 2px dashed #eee; padding-top: 20px; }
+  .result-box { background: #e8f6f3; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #27ae60; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
+  .result-title { font-size: 0.85em; color: #27ae60; font-weight: bold; margin-bottom: 5px; }
+  .result-val { font-size: 1.2em; font-weight: bold; color: #333; margin-top: auto; margin-bottom: auto; width: 100%; }
+  .result-sub { font-size: 0.8em; color: #777; margin-top: 2px; }
+  .error-box { background-color: #fdecea; color: #e74c3c; padding: 14px; border-radius: 10px; margin-bottom: 15px; display: none; font-weight: bold; text-align: center;}
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 9999; }
+  .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  .modal-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: #333; }
+  .modal-desc { font-size: 0.9rem; color: #666; margin-bottom: 15px; }
+  .modal-input { width: 100%; height: 46px; padding: 0 10px; font-size: 16px; margin-bottom: 15px; border: 2px solid #36a2eb; border-radius: 8px; background-color: white; display: block; text-align: center; }
+  .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
+  .btn-pop { flex: 1; padding: 0; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white !important; font-size: 1rem; height: 46px; }
+  .bg-blue { background: #36a2eb; } .bg-red { background: #dc3545; } .bg-gray { background: #6c757d; } .bg-purple { background: #6610f2; }
+  .chk-label { display: flex; align-items: center; margin-bottom: 10px; font-size: 1rem; cursor: pointer; justify-content: flex-start; padding-left: 10px;}
+  .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: white; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 9999; border-top: 1px solid #eee; }
+  .nav-item { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #aaa; font-size: 0.75rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+  .nav-item.active { color: #333; transform: scale(1.05); }
+  .nav-icon { font-size: 1.5rem; margin-bottom: 4px; }
+  .page-section { display: none; animation: fadeIn 0.2s ease-in-out; }
+  .page-section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0.8; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7f6; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  #main-app { display: none; }
+  .google-btn { background: white; color: #333; border: 1px solid #ddd; padding: 12px 20px; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 1.1rem; cursor: pointer; }
+  .user-info-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; margin-bottom: 10px; background: #fff; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 </style>
 </head>
 <body>
 
-<div id="login-page" class="login-box">
-  <h1>💉 펩타이드 매니저</h1>
-  <p>로그인하면 기록이 서버에 저장됩니다.</p>
-  <button id="btnLogin" style="background:white; color:black; border:1px solid #ddd;">🔵 구글 계정으로 로그인</button>
+<div id="login-screen">
+    <h1 style="color:#333; margin-bottom:10px;">💉 펩타이드 & 체중</h1>
+    <p style="color:#666; margin-bottom:40px;">로그인하면 데이터가 서버에 안전하게 저장됩니다.</p>
+    <button id="btnLogin" class="google-btn">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="24" height="24">
+        Google 계정으로 로그인
+    </button>
 </div>
 
-<div id="app-page" style="display:none;">
-  <div style="text-align:right; margin-bottom:10px;">
-    <span id="user-name" style="font-size:12px; color:#666;"></span>
-    <button onclick="logout()" style="width:auto; height:30px; font-size:12px; background:#999; margin-left:5px;">로그아웃</button>
-  </div>
+<div id="main-app">
+    <div class="user-info-bar">
+        <span id="user-email" style="font-weight:bold; color:#555;">사용자님</span>
+        <button onclick="logout()" style="background:#6c757d; color:white; border:none; padding:5px 10px; border-radius:5px; font-size:0.8rem; cursor:pointer;">로그아웃</button>
+    </div>
 
-  <div id="p-manager" class="page active">
-    <div class="container">
-      <h3>투약 기록</h3>
-      <div class="row">
-        <select id="drugType">
-          <option value="tirz">터제파타이드 (5일)</option>
-          <option value="reta">레타트루타이드 (6일)</option>
-          <option value="sema">세마글루타이드 (7일)</option>
-        </select>
-        <input type="number" id="doseAmt" placeholder="mg" step="0.1">
+    <div id="section-manager" class="page-section active">
+        <div class="container">
+          <h2>💉 펩타이드 매니저</h2>
+          <div class="input-group">
+            <select id="drugType">
+              <option value="tirz">터제파타이드 (5일)</option>
+              <option value="reta">레타트루타이드 (6일)</option>
+              <option value="sema">세마글루타이드 (7일)</option>
+            </select>
+            <input type="number" id="doseAmt" placeholder="용량 (mg)" step="0.1">
+          </div>
+          <div class="date-time-group">
+            <input type="date" id="inputDate" oninput="checkDate(this)">
+            <input type="time" id="inputTime" oninput="checkTime(this)">
+            <button class="btn-now" type="button" onclick="setNow()">현재</button> 
+          </div>
+          <button class="btn-add" type="button" onclick="add()">+ 기록 추가</button>
+        
+          <div class="status-board">
+            <div class="status-card card-tirz">
+              <div class="drug-name">터제파타이드</div>
+              <div class="current-val"><span id="valTirz">0.00</span> <span class="unit">mg</span></div>
+              <button class="edit-btn" onclick="openEditModal('tirz')">수정</button>
+            </div>
+            <div class="status-card card-reta">
+              <div class="drug-name">레타트루타이드</div>
+              <div class="current-val"><span id="valReta">0.00</span> <span class="unit">mg</span></div>
+              <button class="edit-btn" onclick="openEditModal('reta')">수정</button>
+            </div>
+            <div class="status-card card-sema">
+              <div class="drug-name">세마글루타이드</div>
+              <div class="current-val"><span id="valSema">0.00</span> <span class="unit">mg</span></div>
+              <button class="edit-btn" onclick="openEditModal('sema')">수정</button>
+            </div>
+          </div>
+        
+          <div class="date-range-box">
+              <div class="range-header">
+                  <div class="range-title">📅 조회 기간 설정</div>
+                  <button class="btn-full-range" onclick="setFullRange()">🔄 전체 기간</button>
+              </div>
+              <div class="range-inputs">
+                  <input type="date" id="searchStart" onchange="checkRangeInput(this)">
+                  <span>~</span>
+                  <input type="date" id="searchEnd" onchange="checkRangeInput(this)">
+                  <button class="btn-search" onclick="searchUpdate()">조회</button>
+              </div>
+          </div>
+        
+          <div class="view-toggle-container">
+            <button class="view-btn active" id="btnShowGraph" onclick="setDisplayType('chart')">📊 그래프 보기</button>
+            <button class="view-btn" id="btnShowList" onclick="setDisplayType('list')">📝 목록 보기</button>
+          </div>
+        
+          <div class="tab-container">
+            <button class="tab-btn active" id="btnAll" onclick="setViewMode('all')">전체</button>
+            <button class="tab-btn" id="btnTirz" onclick="setViewMode('tirz')" style="color:#36a2eb;">터제</button>
+            <button class="tab-btn" id="btnReta" onclick="setViewMode('reta')" style="color:#ff6384;">레타</button>
+            <button class="tab-btn" id="btnSema" onclick="setViewMode('sema')" style="color:#28a745;">세마</button>
+          </div>
+        
+          <div id="chartTooltip" class="chart-tooltip-custom" style="display:none;">
+              <span style="color:#aaa;">그래프를 터치하면 상세 정보가 표시됩니다.</span>
+          </div>
+        
+          <div class="chart-box" id="chartArea">
+            <canvas id="myChart"></canvas>
+          </div>
+          
+          <div class="list-wrapper" id="listArea">
+              <h3 style="margin:20px 0 10px; font-size:1.1em; color:#555;">📅 일별 농도</h3>
+              <table class="daily-table" id="dailyTable">
+                  <thead><tr></tr></thead>
+                  <tbody id="dailyTableBody"></tbody>
+              </table>
+              <div class="pagination-container" id="paginationControls"></div>
+          </div>
+        
+          <div id="historySection">
+              <div class="history-header">
+                  <h3 style="margin:0; font-size:1.1em; color:#555;">💉 투약 기록 관리</h3>
+                  <div style="display:flex; gap:5px; align-items:center;">
+                      <select id="historyFilter" onchange="changeHistoryFilter()">
+                          <option value="all">전체</option>
+                          <option value="tirz">터제</option>
+                          <option value="reta">레타</option>
+                          <option value="sema">세마</option>
+                      </select>
+                      <button class="btn-select-all" onclick="toggleSelectAll()">전체 선택</button>
+                      <button class="btn-del-sel" onclick="askMultiDel()">선택 삭제</button>
+                  </div>
+              </div>
+              <div class="history-box" id="historyList"></div>
+              <div class="pagination-container" id="historyPaginationControls"></div>
+          </div>
+          
+          <button class="btn-reset" onclick="openResetModal()">🗑 데이터 초기화</button>
+        </div>
+    </div>
+
+    <div id="section-calc" class="page-section">
+        <div class="container">
+            <h2>🧮 펩타이드 계산기</h2>
+            <div id="calcErrorBox" class="error-box"></div>
+            
+            <div class="calc-sub-title">1. 재구성 조건</div>
+            <div class="calc-grid">
+                <div class="calc-group">
+                    <span class="input-label">바이알 용량 (mg)</span>
+                    <div class="pill-row" data-group="peptide">
+                        <div class="pill" data-value="10">10</div>
+                        <div class="pill" data-value="30">30</div>
+                        <div class="pill" data-value="60">60</div>
+                        <div class="pill" data-value="custom">입력</div>
+                    </div>
+                    <input type="number" id="peptideMg" class="calc-input" placeholder="예: 10">
+                </div>
+                <div class="calc-group">
+                    <span class="input-label">BAC Water (ml)</span>
+                    <div class="pill-row" data-group="water">
+                        <div class="pill" data-value="1.8">1.8</div>
+                        <div class="pill" data-value="2.4">2.4</div>
+                        <div class="pill" data-value="3.0">3.0</div>
+                        <div class="pill" data-value="custom">입력</div>
+                    </div>
+                    <input type="number" id="waterMl" class="calc-input" placeholder="예: 2">
+                    <div class="muted-text" id="waterCcText"></div>
+                </div>
+                <div class="calc-group" style="grid-column: 1 / -1;">
+                    <span class="input-label">1회 투여량 (mcg)</span>
+                    <div class="pill-row" data-group="dose">
+                        <div class="pill" data-value="250">250</div>
+                        <div class="pill" data-value="500">500</div>
+                        <div class="pill" data-value="1000">1000</div>
+                        <div class="pill" data-value="2000">2000</div>
+                        <div class="pill" data-value="4000">4000</div>
+                        <div class="pill" data-value="6000">6000</div>
+                        <div class="pill" data-value="8000">8000</div>
+                        <div class="pill" data-value="10000">10000</div>
+                        <div class="pill" data-value="12000">12000</div>
+                        <div class="pill" data-value="custom">입력</div>
+                    </div>
+                    <input type="number" id="doseMcg" class="calc-input" placeholder="예: 500">
+                    <div class="muted-text" id="doseMgText"></div>
+                </div>
+            </div>
+
+            <div class="calc-sub-title">2. 투여 주기</div>
+            <div class="calc-group" style="display:flex; gap:10px; align-items:flex-end;">
+                <div style="flex:1">
+                    <span class="input-label">주기</span>
+                    <input type="number" id="intervalCount" class="calc-input" placeholder="1">
+                </div>
+                <div style="flex:1">
+                    <span class="input-label">단위</span>
+                    <select id="intervalUnit" class="calc-select">
+                        <option value="week" selected>주</option>
+                        <option value="day">일</option>
+                    </select>
+                </div>
+                <div style="flex:1">
+                    <span class="input-label">횟수</span>
+                    <input type="number" id="intervalTimes" class="calc-input" placeholder="1">
+                </div>
+            </div>
+
+            <div class="calc-sub-title">3. 비용 (선택)</div>
+            <div class="calc-group">
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <select id="currencyUnit" class="calc-select">
+                        <option value="">화폐 선택</option>
+                        <option value="KRW">원 (KRW)</option>
+                        <option value="USD">달러 (USD)</option>
+                    </select>
+                    <select id="peptidePriceType" class="calc-select">
+                        <option value="vial">1병 기준</option>
+                        <option value="kit">1키트(10병)</option>
+                    </select>
+                </div>
+                <input type="number" id="peptidePrice" class="calc-input" placeholder="금액 입력">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn-reset" id="resetCalcBtn" style="margin:0; flex:1;">초기화</button>
+                <button class="btn-add" id="calcBtn" style="margin:0; flex:2;">계산하기</button>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-box">
+                    <div class="result-title">농도</div>
+                    <div class="result-val" id="concMgMl">-</div>
+                    <div class="result-sub" id="concMcgMl">-</div>
+                </div>
+                <div class="result-box">
+                    <div class="result-title">1회 투여 부피</div>
+                    <div class="result-val" id="volMl">-</div>
+                    <div class="result-sub" id="volCc">-</div>
+                </div>
+                <div class="result-box">
+                    <div class="result-title">인슐린 주사 단위 (U)</div>
+                    <div class="result-val" id="uiUnits">-</div>
+                    <div class="result-sub">1클릭 = 1U</div>
+                </div>
+                <div class="result-box">
+                    <div class="result-title">사용 기간</div>
+                    <div class="result-val" id="vialUsage">-</div>
+                    <div class="result-sub" id="vialRemain" style="color:#e74c3c;"></div>
+                </div>
+            </div>
+            
+            <div id="penWarning" style="color:#e74c3c; font-weight:bold; text-align:center; margin-top:10px; display:none;"></div>
+            
+            <div class="result-box" id="monthlyCostBox" style="display:none; margin-top:10px; background:#fdfefe; border-color:#3498db;">
+                <div class="result-title" style="color:#3498db;">월 예상 비용</div>
+                <div class="result-val" id="monthlyCostValue">-</div>
+                <div class="result-sub" id="monthlyCostDetail">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="section-weight" class="page-section">
+        <div class="container">
+          <h2>⚖️ 체중 관리</h2>
+          
+          <div class="input-group">
+            <input type="number" id="userHeight" placeholder="키 (cm)" style="width:100%; font-weight:bold;" oninput="saveWeightProfile()">
+          </div>
+          <div class="input-group" style="margin-bottom: 20px;">
+            <input type="number" id="userAge" placeholder="나이" style="flex:1;" oninput="saveWeightProfile()">
+            <select id="userGender" style="flex:1; background:#f9f9f9; font-weight:bold; text-align-last:center; color:#36a2eb;" onchange="saveWeightProfile()">
+                <option value="M">남성</option>
+                <option value="F">여성</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <input type="number" id="weightInput" placeholder="현재 체중 (kg)" step="0.1" style="flex:2; font-weight:bold;">
+          </div>
+          <div class="date-time-group">
+            <input type="date" id="weightDate" oninput="checkDate(this)">
+            <input type="time" id="weightTime" oninput="checkTime(this)">
+            <button class="btn-now" type="button" onclick="setWeightNow()">현재</button> 
+          </div>
+          <button class="btn-add" type="button" onclick="addWeight()">+ 체중 기록</button>
+
+          <div class="status-board">
+            <div class="status-card card-weight-cur">
+              <div class="drug-name">현재 체중</div>
+              <div class="current-val"><span id="valCurWeight">--</span> <span class="unit">kg</span></div>
+            </div>
+            <div class="status-card card-bmi-calc">
+              <div class="drug-name">BMI (비만도)</div>
+              <div class="current-val"><span id="valBMI">--</span> <span class="unit" id="valBMIStatus" style="font-size:0.6em; background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:4px;">-</span></div>
+            </div>
+            <div class="status-card card-bmr-calc">
+              <div class="drug-name">기초대사량 (BMR)</div>
+              <div class="current-val"><span id="valBMR">--</span> <span class="unit">kcal</span></div>
+            </div>
+            <div class="status-card card-weight-goal">
+              <div class="drug-name">목표 체중</div>
+              <div class="current-val"><span id="valGoalWeight">--</span> <span class="unit">kg</span></div>
+              <button class="edit-btn" onclick="openGoalModal()">설정</button>
+            </div>
+            <div class="status-card card-weight-bmi">
+              <div class="drug-name" id="lblGapTitle">남은 체중</div>
+              <div class="current-val" id="valGapWeight">-- <span class="unit">kg</span></div>
+            </div>
+          </div>
+
+          <div class="date-range-box">
+              <div class="range-header">
+                  <div class="range-title">📅 조회 기간 설정</div>
+                  <button class="btn-full-range" onclick="setWeightFullRange()">🔄 전체 기간</button>
+              </div>
+              <div class="range-inputs">
+                  <input type="date" id="searchWeightStart" onchange="checkDate(this)">
+                  <span>~</span>
+                  <input type="date" id="searchWeightEnd" onchange="checkDate(this)">
+                  <button class="btn-search btn-search-weight" onclick="searchWeightUpdate()">조회</button>
+              </div>
+          </div>
+
+          <div class="view-toggle-container">
+            <button class="view-btn active" id="btnShowGraph" onclick="setWeightDisplayType('chart')">📊 그래프 보기</button>
+            <button class="view-btn" id="btnShowList" onclick="setWeightDisplayType('list')">📝 목록 보기</button>
+          </div>
+
+          <div id="weightChartArea">
+              <div id="weightChartTooltip" class="chart-tooltip-custom">
+                  <span style="color:#aaa;">그래프를 터치하면 상세 정보가 표시됩니다.</span>
+              </div>
+              <div class="chart-box" style="margin-bottom:20px;">
+                <canvas id="weightChart"></canvas>
+              </div>
+              <div style="text-align:center; color:#888; font-size:0.8rem;">※ 조회 기간 내 날짜별 마지막 기록</div>
+          </div>
+
+          <div id="weightDailyListArea">
+              <h3 style="margin:0 0 10px; font-size:1.1em; color:#555;">📅 일별 체중 (최종 기록)</h3>
+              <table class="daily-table">
+                  <thead><tr><th style="width:40%;">날짜</th><th style="width:60%;">체중</th></tr></thead>
+                  <tbody id="weightDailyTableBody"></tbody>
+              </table>
+              <div class="pagination-container" id="weightDailyPagination"></div>
+          </div>
+
+          <div class="full-history-section">
+              <div class="history-header">
+                  <h3 style="margin:0; font-size:1.1em; color:#555;">📋 전체 기록 내역 (수정/삭제)</h3>
+                  <div style="display:flex; gap:5px;">
+                      <button class="btn-select-all" onclick="toggleWeightSelectAll()">전체 선택</button>
+                      <button class="btn-del-sel" onclick="askWeightMultiDel()">선택 삭제</button>
+                  </div>
+              </div>
+              <div class="history-box" id="weightFullHistoryList"></div>
+              <div class="pagination-container" id="weightHistoryPagination"></div>
+          </div>
+
+          <button class="btn-reset" onclick="openWeightResetModal()">🗑 데이터 초기화</button>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="switchPage('manager', this)">
+        <div class="nav-icon">📊</div>
+        <span>잔여량</span>
       </div>
-      <div class="row">
-        <input type="date" id="inputDate">
-        <input type="time" id="inputTime">
+      <div class="nav-item" onclick="switchPage('calc', this)">
+        <div class="nav-icon">🧮</div>
+        <span>계산기</span>
       </div>
-      <button onclick="addDose()" class="bg-green">+ 기록 추가</button>
-      
-      <div style="margin-top:20px;">
-        <div class="card bg-blue"><span>터제 농도</span><span id="valTirz">0.00</span></div>
-        <div class="card bg-red"><span>레타 농도</span><span id="valReta">0.00</span></div>
-        <div class="card bg-green"><span>세마 농도</span><span id="valSema">0.00</span></div>
+      <div class="nav-item" onclick="switchPage('weight', this)">
+        <div class="nav-icon">⚖️</div>
+        <span>체중</span>
       </div>
-      <div style="height:250px;"><canvas id="myChart"></canvas></div>
-      <div id="doseList" style="margin-top:20px;"></div>
+    </div>
+</div>
+
+<div id="editModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" id="editModalTitle">현재값 수정</div>
+    <p class="modal-desc">현재 날짜 및 시간으로 잔여량을 설정합니다.</p>
+    <input type="number" id="editInput" class="modal-input" step="0.1" placeholder="0.0">
+    <div class="modal-btns">
+      <button class="btn-pop bg-gray" onclick="closeEditModal()">취소</button>
+      <button class="btn-pop bg-blue" onclick="saveManualValue()">저장</button>
     </div>
   </div>
+</div>
 
-  <div id="p-weight" class="page">
-    <div class="container">
-      <h3>체중 기록</h3>
-      <div class="row">
-        <input type="number" id="weightInput" placeholder="kg" step="0.1">
-        <button onclick="addWeight()" class="bg-purple">기록</button>
-      </div>
-      <div class="card bg-purple"><span>현재 체중</span><span id="curWeight">-- kg</span></div>
-      <div style="height:250px;"><canvas id="weightChart"></canvas></div>
-      <div id="weightList" style="margin-top:20px;"></div>
+<div id="recordEditModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" style="color:#dc3545;">기록 수정</div>
+    <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#555;">약물 종류</div>
+    <select id="editRecordType" class="modal-input" style="background:#f9f9f9; text-align-last: center; font-weight:bold;">
+        <option value="tirz">터제파타이드</option>
+        <option value="reta">레타트루타이드</option>
+        <option value="sema">세마글루타이드</option>
+    </select>
+    <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#555;">용량 (mg)</div>
+    <input type="number" id="editRecordAmt" class="modal-input" step="0.1">
+    <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#555;">날짜 및 시간</div>
+    <div class="date-time-group" style="margin-bottom:0;">
+        <input type="date" id="editRecordDate" class="modal-input" style="margin-bottom:0;" oninput="checkDate(this)">
+        <input type="time" id="editRecordTime" class="modal-input" style="margin-bottom:0;" oninput="checkTime(this)">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-pop bg-gray" onclick="closeRecordEditModal()">취소</button>
+      <button class="btn-pop bg-blue" onclick="saveRecordEdit()">저장</button>
     </div>
   </div>
+</div>
 
-  <div class="bottom-nav">
-    <div class="nav-item active" onclick="goPage('manager', this)">💉 투약</div>
-    <div class="nav-item" onclick="goPage('weight', this)">⚖️ 체중</div>
+<div id="resetModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" style="color:#dc3545;">⚠️ 데이터 초기화</div>
+    <div style="text-align:left; padding: 10px;">
+        <label class="chk-label"><input type="checkbox" id="checkTirz"> 🔵 터제파타이드</label>
+        <label class="chk-label"><input type="checkbox" id="checkReta"> 🔴 레타트루타이드</label>
+        <label class="chk-label"><input type="checkbox" id="checkSema"> 🟢 세마글루타이드</label>
+    </div>
+    <div id="resetError" style="color:red; display:none; margin-bottom:10px;">선택해주세요!</div>
+    <div class="modal-btns">
+      <button class="btn-pop bg-gray" onclick="closeResetModal()">취소</button>
+      <button class="btn-pop bg-red" onclick="confirmReset()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<div id="singleDelModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" style="color:#dc3545;">⚠️ 기록 삭제</div>
+    <p>정말 삭제하시겠습니까?</p>
+    <div class="modal-btns">
+      <button class="btn-pop bg-gray" onclick="closeSingleDelModal()">취소</button>
+      <button class="btn-pop bg-red" onclick="confirmSingleDel()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<div id="goalModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title">목표 체중 설정</div>
+    <input type="number" id="goalInput" class="modal-input" step="0.1" placeholder="예: 50.0">
+    <div class="modal-btns">
+      <button class="btn-pop bg-gray" onclick="closeGoalModal()">취소</button>
+      <button class="btn-pop bg-purple" onclick="saveGoalWeight()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="weightDeleteModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" style="color:#dc3545;">⚠️ 기록 삭제</div>
+    <p>선택한 기록을 삭제하시겠습니까?</p>
+    <div class="modal-btns">
+      <button class="btn-pop bg-gray" onclick="closeWeightDeleteModal()">취소</button>
+      <button class="btn-pop bg-red" onclick="confirmWeightDelete()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<div id="weightEditModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" style="color:#dc3545;">기록 수정</div>
+    <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#555;">체중 (kg)</div>
+    <input type="number" id="weightEditVal" class="modal-input" step="0.1">
+    <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#555;">날짜 및 시간</div>
+    <div class="date-time-group" style="margin-bottom:0;">
+        <input type="date" id="weightEditDate" class="modal-input" style="margin-bottom:0;" oninput="checkDate(this)">
+        <input type="time" id="weightEditTime" class="modal-input" style="margin-bottom:0;" oninput="checkTime(this)">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-pop bg-gray" onclick="closeWeightEditModal()">취소</button>
+      <button class="btn-pop bg-purple" onclick="saveWeightEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="weightResetModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" style="color:#dc3545;">⚠️ 데이터 초기화</div>
+    <p>모든 체중 기록과 설정이 영구적으로 삭제됩니다.<br>정말 초기화 하시겠습니까?</p>
+    <div class="modal-btns">
+      <button class="btn-pop bg-gray" onclick="closeWeightResetModal()">취소</button>
+      <button class="btn-pop bg-red" onclick="confirmWeightReset()">초기화</button>
+    </div>
   </div>
 </div>
 
 <script type="module">
-  // ============================================================
-  // [1] 파이어베이스 설정 (스크린샷 키값 적용 완료)
-  // ============================================================
+  // =================================================================
+  // [1] 파이어베이스 설정 (오류 수정됨: CDN 방식)
+  // =================================================================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+  // ▼ 사용자님 키값 (스크린샷 참조) ▼
   const firebaseConfig = {
     apiKey: "AIzaSyDcrkHfImrYEZfy5Q0awsqCwL8BxkeHzF0",
     authDomain: "peptide-manager.firebaseapp.com",
@@ -111,214 +614,372 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   let currentUser = null;
-  let doseChart = null, weightChartObj = null;
 
-  // ============================================================
-  // [2] 로그인 관리
-  // ============================================================
+  // 전역 변수
+  let doses = [], weightData = [];
+  let userProfile = JSON.parse(localStorage.getItem('user_profile_v1')) || { height: '', age: '', gender: 'M' };
+  let targetWeight = parseFloat(localStorage.getItem('weight_target_v1')) || 0;
+  let myChart, weightChart;
+  let currentEditType = '', viewMode = 'all', displayType = 'chart', weightDisplayType = 'chart';
+  let deleteTargetId = null, editTargetId = null, deleteTargetIds = []; 
+  let weightDeleteTargetId = null, weightDeleteTargetIds = [], weightEditTargetId = null;
+  let currentPage = 1, currentHistoryPage = 1, weightDailyPage = 1, weightHistoryPage = 1;
+  const itemsPerPage = 15, weightItemsPerPage = 10;
+  
+  const PK_CONFIG = { tirz: { name: '터제파타이드', halfLife: 5.0, tMax: 1.0 }, reta: { name: '레타트루타이드', halfLife: 6.0, tMax: 1.5 }, sema: { name: '세마글루타이드', halfLife: 7.0, tMax: 2.0 } };
+  const DRUG_CONSTANTS = {};
+  Object.keys(PK_CONFIG).forEach(k => {
+      const { halfLife, tMax } = PK_CONFIG[k]; const ke = Math.log(2) / halfLife;
+      let ka = (tMax >= 1.8) ? 0.8 : (tMax >= 1.4 ? 1.2 : 2.5);
+      const peakTime = (Math.log(ka) - Math.log(ke)) / (ka - ke);
+      const scale = 1 / (Math.exp(-ke * peakTime) - Math.exp(-ka * peakTime));
+      DRUG_CONSTANTS[k] = { ke, ka, scale };
+  });
+
+  // =================================================================
+  // [2] 로그인/앱 초기화
+  // =================================================================
   document.getElementById('btnLogin').addEventListener('click', () => {
-      signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert("로그인 오류: " + e.message));
+      signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert("로그인 실패: " + e.message));
   });
   window.logout = () => signOut(auth);
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser = user;
-      document.getElementById('login-page').style.display = 'none';
-      document.getElementById('app-page').style.display = 'block';
-      document.getElementById('user-name').innerText = user.email;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      document.getElementById('user-email').innerText = user.email.split('@')[0] + '님';
       initApp();
     } else {
       currentUser = null;
-      document.getElementById('login-page').style.display = 'flex';
-      document.getElementById('app-page').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('main-app').style.display = 'none';
     }
   });
 
-  // ============================================================
-  // [3] 앱 초기화 및 실시간 데이터 연동
-  // ============================================================
   function initApp() {
-    // 날짜 기본값 세팅
-    document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('inputTime').value = new Date().toTimeString().slice(0,5);
+    setNow(); setWeightNow(); loadProfileUI();
+    
+    // 계산기 초기화
+    setupPillGroup('peptide', 'peptideMg');
+    setupPillGroup('water', 'waterMl', updateWaterCc);
+    setupPillGroup('dose', 'doseMcg', updateDoseMg);
 
-    // [투약 데이터 리스너]
+    // 투약 데이터 연결 (실시간)
     const qDose = query(collection(db, "doses"), where("uid", "==", currentUser.uid), orderBy("time", "asc"));
     onSnapshot(qDose, (snap) => {
-      const doses = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      renderDoses(doses);
-      updateChart(doses);
-      updateLevels(doses);
+      doses = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      initDateRange(); update();
     });
 
-    // [체중 데이터 리스너]
+    // 체중 데이터 연결 (실시간)
     const qWeight = query(collection(db, "weights"), where("uid", "==", currentUser.uid), orderBy("time", "asc"));
     onSnapshot(qWeight, (snap) => {
-      const weights = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      renderWeights(weights);
-      updateWeightChart(weights);
+      weightData = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      initWeightDateRange(); updateWeightUI();
     });
   }
 
-  // ============================================================
-  // [4] 데이터 추가/삭제 로직 (DB 연동)
-  // ============================================================
-  window.addDose = async () => {
-    if(!currentUser) return alert("로그인이 필요합니다.");
+  // =================================================================
+  // [3] DB 쓰기 함수 (localStorage 대체)
+  // =================================================================
+  window.add = async () => {
+    if(!currentUser) return alert("로그인 필요");
+    const type = document.getElementById('drugType').value;
     const amt = parseFloat(document.getElementById('doseAmt').value);
-    const dateVal = document.getElementById('inputDate').value;
-    const timeVal = document.getElementById('inputTime').value;
+    const date = document.getElementById('inputDate').value;
+    const time = document.getElementById('inputTime').value;
+    if (!amt || !date || !time) return alert("값을 입력해주세요.");
+    
+    await addDoc(collection(db, "doses"), { uid: currentUser.uid, type, amt, time: new Date(`${date}T${time}`).getTime(), manual: false });
+    alert("추가되었습니다.");
+  };
 
-    if(!amt || !dateVal || !timeVal) return alert("날짜와 용량을 모두 입력하세요");
+  window.saveManualValue = async () => {
+    if(!currentUser) return;
+    const val = parseFloat(document.getElementById('editInput').value);
+    if (isNaN(val)) return alert("숫자만 입력하세요.");
+    await addDoc(collection(db, "doses"), { uid: currentUser.uid, type: currentEditType, amt: val, time: Date.now(), manual: true });
+    closeEditModal();
+  };
+
+  window.confirmSingleDel = async () => {
+    if(!currentUser) return;
+    if(deleteTargetId !== null) await deleteDoc(doc(db, "doses", deleteTargetId));
+    else if(deleteTargetIds.length) for(const id of deleteTargetIds) await deleteDoc(doc(db, "doses", id));
+    closeSingleDelModal();
+  };
+
+  window.saveRecordEdit = async () => {
+    if(!currentUser || !editTargetId) return;
+    const newType = document.getElementById('editRecordType').value;
+    const amt = parseFloat(document.getElementById('editRecordAmt').value);
+    let dDate = document.getElementById('editRecordDate').value, dTime = document.getElementById('editRecordTime').value;
+    if(!dDate) dDate = getTodayString(); if(!dTime) dTime = getNowTimeString();
+    if(isNaN(amt)) return alert("값을 확인해주세요.");
     
-    const ts = new Date(dateVal + 'T' + timeVal).getTime();
+    await updateDoc(doc(db, "doses", editTargetId), { 
+        type: newType, amt: amt, time: new Date(`${dDate}T${dTime}`).getTime() 
+    });
+    closeRecordEditModal();
+  };
+
+  window.confirmReset = async () => {
+    if(!currentUser) return;
+    const t = document.getElementById('checkTirz').checked, r = document.getElementById('checkReta').checked, s = document.getElementById('checkSema').checked;
+    if(!t && !r && !s) { document.getElementById('resetError').style.display = 'block'; return; }
     
-    try {
-        await addDoc(collection(db, "doses"), {
-          uid: currentUser.uid,
-          type: document.getElementById('drugType').value,
-          amt: amt,
-          time: ts
-        });
-        alert("기록되었습니다.");
-    } catch(e) { alert("저장 실패: " + e.message); }
+    const toDel = doses.filter(d => (t && d.type==='tirz') || (r && d.type==='reta') || (s && d.type==='sema'));
+    if(confirm(`${toDel.length}개의 데이터를 삭제합니다.`)) {
+        for(const d of toDel) await deleteDoc(doc(db, "doses", d.id));
+        closeResetModal();
+    }
   };
 
   window.addWeight = async () => {
-    if(!currentUser) return alert("로그인이 필요합니다.");
+    if(!currentUser) return;
     const w = parseFloat(document.getElementById('weightInput').value);
-    if(!w) return alert("체중을 입력하세요");
+    const date = document.getElementById('weightDate').value;
+    const time = document.getElementById('weightTime').value;
+    if(!w) return alert("체중 입력 필요");
     
-    try {
-        await addDoc(collection(db, "weights"), {
-          uid: currentUser.uid,
-          weight: w,
-          time: Date.now()
-        });
-        document.getElementById('weightInput').value = '';
-    } catch(e) { alert("저장 실패: " + e.message); }
+    await addDoc(collection(db, "weights"), { uid: currentUser.uid, weight: w, time: new Date(`${date}T${time}`).getTime() });
+    document.getElementById('weightInput').value = ''; 
   };
 
-  window.delItem = async (col, id) => {
-    if(confirm("정말 삭제하시겠습니까?")) {
-        await deleteDoc(doc(db, col, id));
+  window.confirmWeightDelete = async () => {
+    if(!currentUser) return;
+    if(weightDeleteTargetId !== null) await deleteDoc(doc(db, "weights", weightDeleteTargetId));
+    else if (weightDeleteTargetIds.length > 0) for(const id of weightDeleteTargetIds) await deleteDoc(doc(db, "weights", id));
+    closeWeightDeleteModal();
+  };
+
+  window.saveWeightEdit = async () => {
+    if(!currentUser || !weightEditTargetId) return;
+    const w = parseFloat(document.getElementById('weightEditVal').value);
+    const date = document.getElementById('weightEditDate').value;
+    const time = document.getElementById('weightEditTime').value;
+    if(!w) return;
+    await updateDoc(doc(db, "weights", weightEditTargetId), { weight: w, time: new Date(`${date}T${time}`).getTime() });
+    closeWeightEditModal();
+  };
+
+  window.confirmWeightReset = async () => {
+    if(!currentUser) return;
+    if(confirm("모든 체중 기록을 삭제합니까?")) {
+        for(const d of weightData) await deleteDoc(doc(db, "weights", d.id));
+        closeWeightResetModal();
     }
   };
 
-  // ============================================================
-  // [5] 화면 렌더링 및 계산 로직
-  // ============================================================
-  function renderDoses(list) {
-    const el = document.getElementById('doseList'); el.innerHTML = '';
-    list.slice().reverse().forEach(d => {
-      const date = new Date(d.time);
-      const dateStr = `${date.getMonth()+1}/${date.getDate()}`;
-      // 종류별 한글명 변환
-      let name = d.type;
-      if(d.type==='tirz') name='터제'; if(d.type==='reta') name='레타'; if(d.type==='sema') name='세마';
+  // =================================================================
+  // [4] 공통/UI/계산 로직 (기존 코드 100% 유지)
+  // =================================================================
+  window.setNow = () => { document.getElementById('inputDate').value = getTodayString(); document.getElementById('inputTime').value = getNowTimeString(); };
+  window.setWeightNow = () => { document.getElementById('weightDate').value = getTodayString(); document.getElementById('weightTime').value = getNowTimeString(); };
+  window.getTodayString=()=>{const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;};
+  window.getNowTimeString=()=>{const n=new Date(); return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;};
+  window.checkDate=(el)=>{if(!el.value)el.value=getTodayString();}; window.checkTime=(el)=>{if(!el.value)el.value=getNowTimeString();};
+  window.checkRangeInput=(el)=>{if(!el.value)el.value=getTodayString();};
 
-      el.innerHTML += `<div class="list-item">
-          <span>${dateStr} <b>${name} ${d.amt}mg</b></span> 
-          <button class="del-btn" onclick="delItem('doses', '${d.id}')">삭제</button>
-      </div>`;
-    });
+  window.switchPage = (pageName, navEl) => {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); navEl.classList.add('active');
+    document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active')); document.getElementById(`section-${pageName}`).classList.add('active');
+    if(pageName === 'manager' && myChart) setTimeout(() => myChart.resize(), 50);
+    if(pageName === 'weight' && weightChart) setTimeout(() => weightChart.resize(), 50);
+    window.scrollTo(0, 0);
+  };
+
+  // 펩타이드 계산
+  function calculateConcentration(dose, days, type) {
+    if (days < 0) return 0;
+    const { ke, ka, scale } = DRUG_CONSTANTS[type];
+    const val = dose * scale * (Math.exp(-ke * days) - Math.exp(-ka * days));
+    return val > 0 ? val : 0;
   }
-
-  function renderWeights(list) {
-    const el = document.getElementById('weightList'); el.innerHTML = '';
-    if(list.length) document.getElementById('curWeight').innerText = list[list.length-1].weight + " kg";
-    
-    list.slice().reverse().forEach(d => {
-      const date = new Date(d.time);
-      const dateStr = `${date.getMonth()+1}/${date.getDate()}`;
-      el.innerHTML += `<div class="list-item">
-          <span>${dateStr} <b>${d.weight}kg</b></span> 
-          <button class="del-btn" onclick="delItem('weights', '${d.id}')">삭제</button>
-      </div>`;
-    });
+  function calculateTotalLevel(target, type) {
+    let total = 0;
+    const history = doses.filter(d => d.type === type).sort((a,b) => a.time - b.time);
+    let startIdx = -1;
+    history.forEach((h, i) => { if(h.manual && h.time <= target) startIdx = i; });
+    if (startIdx !== -1) {
+        const ov = history[startIdx];
+        total = ov.amt * Math.pow(0.5, (target - ov.time) / 86400000 / PK_CONFIG[type].halfLife);
+    }
+    for (let i = startIdx + 1; i < history.length; i++) {
+        if (history[i].time > target) break;
+        if (!history[i].manual) total += calculateConcentration(history[i].amt, (target - history[i].time)/86400000, type);
+    }
+    return total;
   }
-
-  function updateLevels(doses) {
+  window.update = () => {
     const now = Date.now();
-    const configs = { tirz: [5, 1], reta: [6, 1.5], sema: [7, 2] }; 
-    ['tirz', 'reta', 'sema'].forEach(type => {
-      let total = 0;
-      doses.filter(d => d.type === type).forEach(d => {
-        const days = (now - d.time) / 86400000;
-        if(days >= 0) total += d.amt * Math.pow(0.5, days/configs[type][0]);
-      });
-      document.getElementById('val'+type.charAt(0).toUpperCase()+type.slice(1)).innerText = total.toFixed(2);
-    });
-  }
-
-  function updateChart(doses) {
-    const ctx = document.getElementById('myChart');
-    if(doseChart) doseChart.destroy();
-    
-    const labels = [], d1 = [], d2 = [], d3 = [];
-    // 오늘 기준 -5일 ~ +25일
-    for(let i=0; i<30; i++) {
-        const t = Date.now() + (i-5)*86400000;
-        labels.push(new Date(t).getDate());
-        d1.push(calcSim(doses, t, 'tirz')); 
-        d2.push(calcSim(doses, t, 'reta')); 
-        d3.push(calcSim(doses, t, 'sema'));
-    }
-    
-    doseChart = new Chart(ctx, { 
-        type: 'line', 
-        data: { 
-            labels, 
-            datasets: [
-              {label:'T', data:d1, borderColor:'#36a2eb', pointRadius:0, borderWidth:2},
-              {label:'R', data:d2, borderColor:'#ff6384', pointRadius:0, borderWidth:2},
-              {label:'S', data:d3, borderColor:'#28a745', pointRadius:0, borderWidth:2}
-            ]
-        }, 
-        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} } 
-    });
-  }
-
-  function updateWeightChart(weights) {
-    const ctx = document.getElementById('weightChart');
-    if(weightChartObj) weightChartObj.destroy();
-    
-    // 날짜별로 데이터 정리
-    const dataMap = {};
-    weights.forEach(w => {
-        const d = new Date(w.time).getDate();
-        dataMap[d] = w.weight; // 같은 날짜면 마지막 기록 사용
-    });
-    
-    const labels = Object.keys(dataMap);
-    const data = Object.values(dataMap);
-
-    weightChartObj = new Chart(ctx, { 
-        type: 'line', 
-        data: {
-          labels: labels,
-          datasets: [{ label: '체중', data: data, borderColor: '#6610f2', fill: true, backgroundColor:'rgba(102,16,242,0.1)' }]
-        }, 
-        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} } 
-    });
-  }
-
-  function calcSim(doses, time, type) {
-    let sum = 0; 
-    const h = type==='tirz'?5:(type==='reta'?6:7);
-    doses.filter(d=>d.type===type && d.time <= time).forEach(d => {
-        sum += d.amt * Math.pow(0.5, (time-d.time)/86400000/h)
-    });
-    return sum;
-  }
-
-  window.goPage = (p, el) => {
-    document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
-    document.getElementById(p==='manager'?'p-manager':'p-weight').classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-    el.classList.add('active');
+    ['tirz','reta','sema'].forEach(t => document.getElementById(`val${t.charAt(0).toUpperCase()+t.slice(1)}`).innerText = calculateTotalLevel(now, t).toFixed(2));
+    if(displayType === 'chart') drawChart();
+    renderHistoryList(); renderDailyTable();
   };
+  
+  // 조회 및 렌더링 헬퍼
+  window.initDateRange=()=>{const s=new Date(Date.now()-5*86400000), e=new Date(Date.now()+45*86400000); if(doses.length&&doses[0].time<s.getTime())s.setTime(doses[0].time); document.getElementById('searchStart').value=s.toISOString().split('T')[0]; document.getElementById('searchEnd').value=e.toISOString().split('T')[0];};
+  window.setFullRange=()=>{let t=viewMode==='all'?doses:doses.filter(d=>d.type===viewMode); if(!t.length){initDateRange();window.searchUpdate();return;} const ts=t.map(d=>d.time); document.getElementById('searchStart').value=new Date(Math.min(...ts)).toISOString().split('T')[0]; document.getElementById('searchEnd').value=new Date(Math.max(...ts)+45*86400000).toISOString().split('T')[0]; window.searchUpdate();};
+  window.searchUpdate=()=>{currentPage=1; update();};
+  window.setDisplayType=(t)=>{displayType=t; document.getElementById('btnShowGraph').classList.toggle('active',t==='chart'); document.getElementById('btnShowList').classList.toggle('active',t==='list'); document.getElementById('chartArea').style.display=t==='chart'?'block':'none'; document.getElementById('chartTooltip').style.display=t==='chart'?'flex':'none'; document.getElementById('listArea').style.display=t==='list'?'block':'none'; if(t==='list')renderDailyTable(); update();};
+  window.setViewMode=(m)=>{viewMode=m; document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.getElementById(m==='all'?'btnAll':(m==='tirz'?'btnTirz':(m==='reta'?'btnReta':'btnSema'))).classList.add('active'); const bT=document.getElementById('btnTirz'), bR=document.getElementById('btnReta'), bS=document.getElementById('btnSema'); if(m==='tirz'){bT.style.background='#36a2eb';bT.style.color='white';}else{bT.style.background='#f8f9fa';bT.style.color='#36a2eb';} if(m==='reta'){bR.style.background='#ff6384';bR.style.color='white';}else{bR.style.background='#f8f9fa';bR.style.color='#ff6384';} if(m==='sema'){bS.style.background='#28a745';bS.style.color='white';}else{bS.style.background='#f8f9fa';bS.style.color='#28a745';} currentHistoryPage=1; update();};
+
+  // 목록 그리기
+  function renderHistoryList() {
+    const el = document.getElementById('historyList'); el.innerHTML = '';
+    const f = document.getElementById('historyFilter').value;
+    const list = doses.filter(d => f === 'all' || d.type === f).reverse();
+    const pageList = list.slice((currentHistoryPage-1)*itemsPerPage, currentHistoryPage*itemsPerPage);
+    pageList.forEach(d => {
+        const date = new Date(d.time);
+        const dateStr = `${date.getFullYear()}. ${date.getMonth()+1}. ${date.getDate()}. (${['일','월','화','수','목','금','토'][date.getDay()]}) <span style="white-space:nowrap">${date.getHours()>=12?'오후':'오전'} ${date.getHours()%12||12}:${String(date.getMinutes()).padStart(2,'0')}</span>`;
+        const color = d.type === 'tirz' ? 'tirz' : (d.type === 'reta' ? 'reta' : 'sema');
+        const name = d.type === 'tirz' ? '터제' : (d.type === 'reta' ? '레타' : '세마');
+        el.innerHTML += `<div class="list-item"><div style="display:flex; align-items:center; margin-right:10px;"><input type="checkbox" class="history-chk" value="${d.id}"></div><div style="flex-grow:1;"><span class="tag ${color}">${name}</span> <strong>${d.amt} mg</strong> ${d.manual?'<span class="manual-tag">[강제설정]</span>':''}<div style="color:#888; font-size:0.85em; margin-top:4px;">${dateStr}</div></div><div class="action-group"><button class="list-btn" onclick="openRecordEditModal('${d.id}')" style="color:#36a2eb;">✎</button><button class="list-btn" onclick="askDel('${d.id}')" style="color:#aaa;">✕</button></div></div>`;
+    });
+    renderPagination('historyPaginationControls', Math.ceil(list.length/itemsPerPage), currentHistoryPage, (p)=>{currentHistoryPage=p; renderHistoryList();});
+  }
+  function renderDailyTable() {
+    const tbody = document.getElementById('dailyTableBody'); tbody.innerHTML = '';
+    const thead = document.querySelector('#dailyTable thead tr');
+    let th = '<th style="width:25%">날짜</th>';
+    if(viewMode==='all'||viewMode==='tirz') th+='<th style="color:#36a2eb">터제</th>';
+    if(viewMode==='all'||viewMode==='reta') th+='<th style="color:#ff6384">레타</th>';
+    if(viewMode==='all'||viewMode==='sema') th+='<th style="color:#28a745">세마</th>';
+    thead.innerHTML = th;
+    const sStr = document.getElementById('searchStart').value; const eStr = document.getElementById('searchEnd').value;
+    const nowTs = new Date().getTime(); let s = sStr ? new Date(sStr).getTime() : nowTs - 5*86400000; let e = eStr ? new Date(eStr).getTime() : nowTs + 45*86400000; if(!sStr && doses.length) s = doses[0].time;
+    let dateList = []; for(let t=s; t<=e; t+=86400000) dateList.push(t);
+    const totalPages = Math.ceil(dateList.length / itemsPerPage); if(currentPage>totalPages) currentPage=1;
+    const pageList = dateList.slice((currentPage-1)*itemsPerPage, currentPage*itemsPerPage);
+    const todayStr = new Date().toDateString();
+    pageList.forEach(t => {
+        const d = new Date(t);
+        const dateStr = `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()} (${['일','월','화','수','목','금','토'][d.getDay()]})`;
+        const tr = document.createElement('tr'); if(d.toDateString() === todayStr) tr.className = 'today-row';
+        const getBadge = (type) => doses.filter(x => new Date(x.time).toDateString() === d.toDateString() && x.type===type).map(x=>`<span class="dose-badge">💉 ${x.amt}mg</span>`).join('');
+        let html = `<td class="date-col">${dateStr}</td>`;
+        if(viewMode==='all'||viewMode==='tirz') html += `<td class="val-col" style="color:#36a2eb">${calculateTotalLevel(t,'tirz').toFixed(2)}${getBadge('tirz')}</td>`;
+        if(viewMode==='all'||viewMode==='reta') html += `<td class="val-col" style="color:#ff6384">${calculateTotalLevel(t,'reta').toFixed(2)}${getBadge('reta')}</td>`;
+        if(viewMode==='all'||viewMode==='sema') html += `<td class="val-col" style="color:#28a745">${calculateTotalLevel(t,'sema').toFixed(2)}${getBadge('sema')}</td>`;
+        tr.innerHTML = html; tbody.appendChild(tr);
+    });
+    renderPagination('paginationControls', totalPages, currentPage, (p)=>{currentPage=p; renderDailyTable();});
+  }
+  function drawChart() {
+    const sStr = document.getElementById('searchStart').value; const eStr = document.getElementById('searchEnd').value;
+    const nowTs = new Date().getTime(); let s = sStr ? new Date(sStr).getTime() : nowTs - 5*86400000; let e = eStr ? new Date(eStr).getTime() : nowTs + 45*86400000; if(!sStr && doses.length) s = doses[0].time;
+    const labels = [], dt = [], dr = [], ds = []; const prT=[], pbT=[], prR=[], pbR=[], prS=[], pbS=[], lT=[], lR=[], lS=[]; const todayStr = new Date().toDateString();
+    for(let t=s; t<=e; t+=86400000) {
+        const d = new Date(t); labels.push(`${d.getMonth()+1}.${d.getDate()}`);
+        dt.push(calculateTotalLevel(t,'tirz')); dr.push(calculateTotalLevel(t,'reta')); ds.push(calculateTotalLevel(t,'sema'));
+        const isT = d.toDateString()===todayStr; const findDose = (type) => doses.find(x => x.type===type && new Date(x.time).toDateString()===d.toDateString());
+        const doT = findDose('tirz'), doR = findDose('reta'), doS = findDose('sema');
+        if(doT) { prT.push(6); pbT.push('#36a2eb'); lT.push(doT.amt+'mg'); } else if(isT) { prT.push(8); pbT.push('#36a2eb'); lT.push(null); } else { prT.push(0); pbT.push('transparent'); lT.push(null); }
+        if(doR) { prR.push(6); pbR.push('#ff6384'); lR.push(doR.amt+'mg'); } else if(isT) { prR.push(8); pbR.push('#ff6384'); lR.push(null); } else { prR.push(0); pbR.push('transparent'); lR.push(null); }
+        if(doS) { prS.push(6); pbS.push('#28a745'); lS.push(doS.amt+'mg'); } else if(isT) { prS.push(8); pbS.push('#28a745'); lS.push(null); } else { prS.push(0); pbS.push('transparent'); lS.push(null); }
+    }
+    if(myChart) myChart.destroy();
+    const datasets = [];
+    if(viewMode==='all'||viewMode==='tirz') datasets.push({label:'터제', data:dt, borderColor:'#36a2eb', backgroundColor:'rgba(54,162,235,0.1)', borderWidth:2, tension:0.4, fill:true, pointRadius:prT, pointBackgroundColor:pbT, pointBorderColor:'#fff', pointHoverRadius:6, pointHoverBackgroundColor:'#36a2eb', labelArray:lT, datalabels:{align:'top',anchor:'end',font:{size:10,weight:'bold'},color:'#36a2eb',formatter:(v,c)=>c.dataset.labelArray[c.dataIndex]}});
+    if(viewMode==='all'||viewMode==='reta') datasets.push({label:'레타', data:dr, borderColor:'#ff6384', backgroundColor:'rgba(255,99,132,0.1)', borderWidth:2, tension:0.4, fill:true, pointRadius:prR, pointBackgroundColor:pbR, pointBorderColor:'#fff', pointHoverRadius:6, pointHoverBackgroundColor:'#ff6384', labelArray:lR, datalabels:{align:'top',anchor:'end',font:{size:10,weight:'bold'},color:'#ff6384',formatter:(v,c)=>c.dataset.labelArray[c.dataIndex]}});
+    if(viewMode==='all'||viewMode==='sema') datasets.push({label:'세마', data:ds, borderColor:'#28a745', backgroundColor:'rgba(40,167,69,0.1)', borderWidth:2, tension:0.4, fill:true, pointRadius:prS, pointBackgroundColor:pbS, pointBorderColor:'#fff', pointHoverRadius:6, pointHoverBackgroundColor:'#28a745', labelArray:lS, datalabels:{align:'top',anchor:'end',font:{size:10,weight:'bold'},color:'#28a745',formatter:(v,c)=>c.dataset.labelArray[c.dataIndex]}});
+    const ctx = document.getElementById('myChart').getContext('2d');
+    myChart = new Chart(ctx, { type: 'line', data: { labels, datasets }, options: { responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, scales:{x:{ticks:{autoSkip:true,maxTicksLimit:6}}, y:{beginAtZero:true,title:{display:false},ticks:{padding:10}}}, layout:{padding:{left:10,right:25,top:25,bottom:10}}, plugins:{legend:{display:false}, datalabels:{display:true}, tooltip:{enabled:false, external: customTooltip}} } });
+    function customTooltip(context) {
+        const el = document.getElementById('chartTooltip'); const model = context.tooltip; if(model.opacity === 0) return;
+        if(model.body) {
+             const title = new Date(s + model.dataPoints[0].dataIndex*86400000); const dateStr = `${title.getFullYear()}. ${title.getMonth()+1}. ${title.getDate()}.`; const isT = title.toDateString() === new Date().toDateString();
+             let doseHtml = ''; doses.forEach(d => { if(new Date(d.time).toDateString() === title.toDateString()) { const n = d.type==='tirz'?'터제':(d.type==='reta'?'레타':'세마'); doseHtml += `<span class="tooltip-dose-badge">💉 ${n} ${d.amt}mg</span>`; } });
+             let html = `<div class="tooltip-date">${dateStr}${isT?' (오늘)':''}</div>`; if(doseHtml) html += `<div class="tooltip-doses">${doseHtml}</div>`; html += '<div class="tooltip-body">';
+             model.body.forEach((b, i) => { const color = context.chart.data.datasets[model.dataPoints[i].datasetIndex].borderColor; html += `<div class="tooltip-item"><span class="color-square" style="background:${color}"></span>${b.lines[0]}</div>`; }); html += '</div>'; el.innerHTML = html;
+        }
+    }
+  }
+
+  // [6] 체중 렌더링
+  window.initWeightDateRange = () => { const s = new Date(); s.setDate(s.getDate() - 30); const e = new Date(); if(weightData.length > 0) { const minTime = Math.min(...weightData.map(d=>d.time)); if (minTime < s.getTime()) s.setTime(minTime); } document.getElementById('searchWeightStart').value = s.toISOString().split('T')[0]; document.getElementById('searchWeightEnd').value = e.toISOString().split('T')[0]; };
+  window.setWeightFullRange = () => { if(weightData.length === 0) { initWeightDateRange(); updateWeightUI(); return; } const times = weightData.map(d=>d.time); document.getElementById('searchWeightStart').value = new Date(Math.min(...times)).toISOString().split('T')[0]; document.getElementById('searchWeightEnd').value = new Date(Math.max(...times)).toISOString().split('T')[0]; searchWeightUpdate(); };
+  window.searchWeightUpdate = () => { weightDailyPage = 1; updateWeightUI(); };
+  window.setWeightDisplayType = (type) => { weightDisplayType = type; document.getElementById('btnShowGraphW').classList.toggle('active', type === 'chart'); document.getElementById('btnShowListW').classList.toggle('active', type === 'list'); document.getElementById('weightChartArea').style.display = type === 'chart' ? 'block' : 'none'; document.getElementById('weightDailyListArea').style.display = type === 'list' ? 'block' : 'none'; if (type === 'chart' && weightChart) setTimeout(() => weightChart.resize(), 10); if (type === 'list') renderWeightDailyTable(); };
+  window.loadProfileUI = () => { document.getElementById('userHeight').value = userProfile.height; document.getElementById('userAge').value = userProfile.age; document.getElementById('userGender').value = userProfile.gender; };
+  window.saveWeightProfile = () => { userProfile.height = document.getElementById('userHeight').value; userProfile.age = document.getElementById('userAge').value; userProfile.gender = document.getElementById('userGender').value; localStorage.setItem('user_profile_v1', JSON.stringify(userProfile)); updateWeightUI(); };
+  window.calculateBMI = (currentWeight) => { const heightCm = parseFloat(userProfile.height); if (!heightCm || !currentWeight) return { bmi: '--', status: '-' }; const heightM = heightCm / 100; const bmi = currentWeight / (heightM * heightM); let status = ''; if(bmi < 18.5) status = '저체중'; else if(bmi < 23) status = '정상'; else if(bmi < 25) status = '과체중'; else if(bmi < 30) status = '비만'; else status = '고도비만'; return { bmi: bmi.toFixed(1), status: status }; };
+  window.calculateBMR = (currentWeight) => { const heightCm = parseFloat(userProfile.height); const age = parseFloat(userProfile.age); const gender = userProfile.gender; if (!heightCm || !currentWeight || !age) return '--'; let bmr = (10 * currentWeight) + (6.25 * heightCm) - (5 * age); if(gender === 'M') bmr += 5; else bmr -= 161; return Math.round(bmr).toLocaleString(); };
+  window.getDailyLatestData = () => { const sStr = document.getElementById('searchWeightStart').value; const eStr = document.getElementById('searchWeightEnd').value; const startTime = new Date(sStr).setHours(0,0,0,0); const endTime = new Date(eStr).setHours(23,59,59,999); const dailyMap = {}; weightData.forEach(d => { if (d.time < startTime || d.time > endTime) return; const dt = new Date(d.time); const dateKey = `${dt.getFullYear()}-${dt.getMonth()+1}-${dt.getDate()}`; if (!dailyMap[dateKey] || d.time >= dailyMap[dateKey].time) { dailyMap[dateKey] = d; } }); return Object.values(dailyMap).sort((a, b) => a.time - b.time); };
+  
+  window.updateWeightUI = () => {
+    const current = weightData.length > 0 ? weightData[weightData.length-1].weight : 0;
+    document.getElementById('valCurWeight').innerText = current > 0 ? current.toFixed(1) : '--';
+    document.getElementById('valGoalWeight').innerText = targetWeight > 0 ? targetWeight.toFixed(1) : '--';
+    const bmiData = calculateBMI(current); document.getElementById('valBMI').innerText = bmiData.bmi; document.getElementById('valBMIStatus').innerText = bmiData.status; document.getElementById('valBMR').innerText = calculateBMR(current);
+    if(current > 0 && targetWeight > 0) { const gap = (current - targetWeight).toFixed(1); if(current <= targetWeight) { document.getElementById('lblGapTitle').innerText = "목표 달성!"; document.getElementById('valGapWeight').innerHTML = "성공 🎉"; } else { document.getElementById('lblGapTitle').innerText = `목표 ${targetWeight}kg 까지`; document.getElementById('valGapWeight').innerHTML = `${gap} <span class="unit">kg 남음</span>`; } } else { document.getElementById('lblGapTitle').innerText = "남은 체중"; document.getElementById('valGapWeight').innerHTML = `-- <span class="unit">kg</span>`; }
+    drawWeightChart(); renderWeightDailyTable(); renderWeightFullHistory();
+  };
+  function drawWeightChart() {
+    if(weightChart) weightChart.destroy(); const chartData = getDailyLatestData(); if (chartData.length === 0) return;
+    const labels = chartData.map(d => { const dt = new Date(d.time); return `${dt.getMonth()+1}.${dt.getDate()}`; }); const data = chartData.map(d => d.weight);
+    const ctx = document.getElementById('weightChart').getContext('2d'); const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height); gradient.addColorStop(0, 'rgba(102, 16, 242, 0.4)'); gradient.addColorStop(1, 'rgba(102, 16, 242, 0.0)');
+    weightChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: '체중', data: data, borderColor: '#6610f2', backgroundColor: gradient, borderWidth: 2, tension: 0.4, pointRadius: 6, pointBackgroundColor: '#fff', pointBorderColor: '#6610f2', pointBorderWidth: 2, fill: true, datalabels: { align: 'top', anchor: 'end', font: { size: 11, weight: 'bold' }, color: '#6610f2', offset: 4, formatter: (v) => v } }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, layout: { padding: { top: 20, left: 10, right: 10, bottom: 0 } }, plugins: { legend: { display: false }, datalabels: { display: true }, tooltip: { enabled: false, external: customTooltipW } }, scales: { y: { grace: '10%', grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false }, ticks: { display: false } }, x: { grid: { display: false }, ticks: { color: '#888', font: { size: 11 }, maxTicksLimit: 7 } } } } });
+    function customTooltipW(context) { const el = document.getElementById('weightChartTooltip'); const model = context.tooltip; if(model.opacity === 0) return; if(model.body) { const dataIndex = model.dataPoints[0].dataIndex; const d = chartData[dataIndex]; const dt = new Date(d.time); const dayOfWeek = ['일','월','화','수','목','금','토'][dt.getDay()]; el.innerHTML = `<div class="tooltip-date">${dt.getFullYear()}년 ${dt.getMonth()+1}월 ${dt.getDate()}일 (${dayOfWeek})</div><div class="tooltip-body"><div class="tooltip-item"><span class="color-square circle" style="background:#6610f2"></span><span>체중: <strong>${d.weight} kg</strong></span></div></div>`; } }
+  }
+  function renderWeightDailyTable() {
+    const tbody = document.getElementById('weightDailyTableBody'); tbody.innerHTML = ''; const filteredList = getDailyLatestData().reverse(); 
+    if(filteredList.length === 0) { tbody.innerHTML = '<tr><td colspan="2" style="padding:30px; color:#aaa;">해당 기간의 기록이 없습니다.</td></tr>'; document.getElementById('weightDailyPagination').innerHTML = ''; return; }
+    const totalPages = Math.ceil(filteredList.length / weightItemsPerPage); if(weightDailyPage > totalPages) weightDailyPage = 1;
+    const pageList = filteredList.slice((weightDailyPage - 1) * weightItemsPerPage, weightDailyPage * weightItemsPerPage); const todayStr = new Date().toDateString();
+    pageList.forEach(d => { const date = new Date(d.time); const isToday = date.toDateString() === todayStr; const dayOfWeek = ['일','월','화','수','목','금','토'][date.getDay()]; const dateStr = `${date.getFullYear()}. ${date.getMonth()+1}. ${date.getDate()}. (${dayOfWeek})`; const tr = document.createElement('tr'); if(isToday) tr.className = 'today-row'; tr.innerHTML = `<td>${dateStr}</td><td><span class="weight-text-lg">${d.weight} kg</span></td>`; tbody.appendChild(tr); });
+    renderPagination('weightDailyPagination', totalPages, weightDailyPage, (p) => { weightDailyPage = p; renderWeightDailyTable(); });
+  }
+  function renderWeightFullHistory() {
+    const listEl = document.getElementById('weightFullHistoryList'); listEl.innerHTML = ''; const allList = [...weightData].reverse(); 
+    if(allList.length === 0) { listEl.innerHTML = '<div style="text-align:center; padding:30px; color:#aaa;">기록이 없습니다.</div>'; document.getElementById('weightHistoryPagination').innerHTML = ''; return; }
+    const totalPages = Math.ceil(allList.length / weightItemsPerPage); if(weightHistoryPage > totalPages) weightHistoryPage = 1;
+    const pageList = allList.slice((weightHistoryPage - 1) * weightItemsPerPage, weightHistoryPage * weightItemsPerPage);
+    pageList.forEach(d => { const date = new Date(d.time); const dateStr = `${date.getFullYear()}. ${date.getMonth()+1}. ${date.getDate()}. (${['일','월','화','수','목','금','토'][date.getDay()]})`; const timeStr = `${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+        listEl.innerHTML += `<div class="list-item"><div style="display:flex; align-items:center; margin-right:10px;"><input type="checkbox" class="weight-history-chk" value="${d.id}"></div><div style="flex-grow:1;"><span class="tag weight">체중</span> <strong style="font-size:1.1em;">${d.weight} kg</strong><div style="color:#666; font-size:0.85em; margin-top:4px;">${dateStr} <span style="color:#aaa;">${timeStr}</span></div></div><div class="action-group"><button class="list-btn" onclick="openEditRecordModal('${d.id}')" style="color:#6610f2;">✎</button><button class="list-btn" onclick="askDelete('${d.id}')" style="color:#aaa;">✕</button></div></div>`;
+    });
+    renderPagination('weightHistoryPagination', totalPages, weightHistoryPage, (p) => { weightHistoryPage = p; renderWeightFullHistory(); });
+  }
+
+  // [7] 계산기 로직
+  function setupPillGroup(name, id, cb) { const g = document.querySelector(`.pill-row[data-group="${name}"]`); const inp = document.getElementById(id); g.addEventListener('click', e => { const p = e.target.closest('.pill'); if(!p) return; g.querySelectorAll('.pill').forEach(x=>x.classList.remove('active')); p.classList.add('active'); const v = p.getAttribute('data-value'); if(v==='custom') inp.focus(); else { inp.value=v; if(cb) cb(); } }); }
+  function updateWaterCc() { const v = document.getElementById('waterMl').value; document.getElementById('waterCcText').innerText = v ? `${v} ml = ${v} cc` : ''; }
+  function updateDoseMg() { const v = document.getElementById('doseMcg').value; document.getElementById('doseMgText').innerText = v ? `${v/1000} mg` : ''; }
+  document.getElementById('waterMl').addEventListener('input', updateWaterCc); document.getElementById('doseMcg').addEventListener('input', updateDoseMg);
+  document.getElementById('resetCalcBtn').addEventListener('click', () => { document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active')); ['peptideMg','waterMl','doseMcg','intervalCount','intervalTimes','peptidePrice'].forEach(id=>document.getElementById(id).value=''); document.getElementById('waterCcText').innerText=''; document.getElementById('doseMgText').innerText=''; document.getElementById('concMgMl').innerText='-'; document.getElementById('concMcgMl').innerText='-'; document.getElementById('volMl').innerText='-'; document.getElementById('volCc').innerText='-'; document.getElementById('uiUnits').innerText='-'; document.getElementById('vialUsage').innerText='-'; document.getElementById('vialRemain').innerText=''; document.getElementById('calcErrorBox').style.display='none'; document.getElementById('monthlyCostBox').style.display='none'; document.getElementById('penWarning').style.display='none'; });
+  document.getElementById('calcBtn').addEventListener('click', () => { const err = document.getElementById('calcErrorBox'); err.style.display='none'; const pMg = parseFloat(document.getElementById('peptideMg').value), wMl = parseFloat(document.getElementById('waterMl').value), dMcg = parseFloat(document.getElementById('doseMcg').value), iCount = parseFloat(document.getElementById('intervalCount').value), iTimes = parseFloat(document.getElementById('intervalTimes').value); if(!pMg || !wMl || !dMcg || !iCount || !iTimes) { err.innerText = "모든 값을 입력해주세요."; err.style.display='block'; return; } const concMg = pMg/wMl, concMcg = concMg*1000, vol = dMcg/concMcg, ui = vol*100; document.getElementById('concMgMl').innerText = `${concMg.toFixed(2)} mg/ml`; document.getElementById('concMcgMl').innerText = `${concMcg.toFixed(0)} mcg/ml`; document.getElementById('volMl').innerText = `${vol.toFixed(3)} ml`; document.getElementById('volCc').innerText = `${vol.toFixed(3)} cc`; document.getElementById('uiUnits').innerText = `${ui.toFixed(1)} U`; const warn = document.getElementById('penWarning'); if(ui > 60) { warn.style.display='block'; warn.innerText = `⚠️ 60 U 초과 (약 ${Math.ceil(ui/60)}회로 분할 투여)`; } else warn.style.display='none'; const totalMcg = pMg*1000, doses = Math.floor(totalMcg/dMcg); const unit = document.getElementById('intervalUnit').value === 'day' ? '일' : '주'; document.getElementById('vialUsage').innerText = `${Math.floor(doses*iCount/iTimes)}${unit}`; const remain = totalMcg - (doses*dMcg); document.getElementById('vialRemain').innerText = remain > 0 ? `(잔여: ${Math.round(remain)} mcg)` : ''; const curr = document.getElementById('currencyUnit').value, price = parseFloat(document.getElementById('peptidePrice').value); if(curr && price > 0) { const days = unit === 'day' ? iCount : iCount*7; const vialsPerMonth = ((iTimes/days)*30*dMcg) / totalMcg; const unitPrice = document.getElementById('peptidePriceType').value === 'kit' ? price/10 : price; const cost = vialsPerMonth * unitPrice; document.getElementById('monthlyCostBox').style.display = 'block'; document.getElementById('monthlyCostValue').innerText = `${curr==='KRW'?'₩':'$'}${curr==='KRW'?Math.round(cost).toLocaleString():cost.toFixed(2)}`; document.getElementById('monthlyCostDetail').innerText = `약 ${vialsPerMonth.toFixed(1)}병/월`; } else document.getElementById('monthlyCostBox').style.display='none'; });
+
+  // 헬퍼
+  window.renderPagination=(id, total, curr, cb)=>{ const c=document.getElementById(id); c.innerHTML=''; if(total<=1)return; const mkBtn=(txt,dis,clk)=>{const b=document.createElement('button');b.className='page-btn';b.innerHTML=txt;if(dis)b.disabled=true;else b.onclick=clk;c.appendChild(b);}; mkBtn('‹',curr===1,()=>cb(curr-1)); let s=Math.max(1,curr-2),e=Math.min(total,curr+2); if(e-s<4){if(s===1)e=Math.min(total,s+4);else s=Math.max(1,e-4);} for(let i=s;i<=e;i++){const b=document.createElement('button');b.className=`page-btn ${i===curr?'active':''}`;b.innerText=i;b.onclick=()=>cb(i);c.appendChild(b);} mkBtn('›',curr===total,()=>cb(curr+1)); };
+  
+  // 모달 제어
+  window.openEditModal=(t)=>{currentEditType=t; document.getElementById('editModalTitle').innerText=`${PK_CONFIG[t].name} 수정`; document.getElementById('editInput').value=calculateTotalLevel(Date.now(),t).toFixed(2); document.getElementById('editModal').style.display='flex'; document.getElementById('editInput').focus();};
+  window.closeEditModal=()=>{document.getElementById('editModal').style.display='none';};
+  window.openRecordEditModal=(id)=>{editTargetId=id; const d=doses.find(x=>x.id===id); if(!d)return; document.getElementById('editRecordType').value=d.type; document.getElementById('editRecordAmt').value=d.amt; const dt=new Date(d.time); document.getElementById('editRecordDate').value=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; document.getElementById('editRecordTime').value=`${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`; document.getElementById('recordEditModal').style.display='flex';};
+  window.closeRecordEditModal=()=>{document.getElementById('recordEditModal').style.display='none'; editTargetId=null;};
+  window.askDel=(id)=>{deleteTargetId=id; deleteTargetIds=[]; document.getElementById('singleDelModal').style.display='flex';};
+  window.askMultiDel=()=>{const c=document.querySelectorAll('.history-chk:checked'); if(!c.length)return alert("삭제할 항목 선택"); deleteTargetId=null; deleteTargetIds=Array.from(c).map(x=>x.value); document.getElementById('singleDelModal').style.display='flex';};
+  window.closeSingleDelModal=()=>{document.getElementById('singleDelModal').style.display='none'; deleteTargetId=null; deleteTargetIds=[];};
+  window.changeHistoryFilter=()=>{currentHistoryPage=1; renderHistoryList();};
+  window.toggleSelectAll=()=>{const c=document.querySelectorAll('.history-chk'); const all=Array.from(c).every(x=>x.checked); c.forEach(x=>x.checked=!all);};
+  window.openResetModal=()=>{document.getElementById('checkTirz').checked=false; document.getElementById('checkReta').checked=false; document.getElementById('checkSema').checked=false; document.getElementById('resetError').style.display='none'; document.getElementById('resetModal').style.display='flex';};
+  window.closeResetModal=()=>{document.getElementById('resetModal').style.display='none';};
+  window.askDelete=(id)=>{weightDeleteTargetId=id; weightDeleteTargetIds=[]; document.getElementById('weightDeleteModal').style.display='flex';};
+  window.askWeightMultiDel=()=>{const c=document.querySelectorAll('.weight-history-chk:checked'); if(!c.length)return alert("선택된 항목 없음"); weightDeleteTargetId=null; weightDeleteTargetIds=Array.from(c).map(cb=>cb.value); document.getElementById('weightDeleteModal').style.display='flex';};
+  window.closeWeightDeleteModal=()=>{document.getElementById('weightDeleteModal').style.display='none'; weightDeleteTargetId=null; weightDeleteTargetIds=[];};
+  window.openEditRecordModal=(id)=>{const t=weightData.find(d=>d.id===id); if(!t)return; weightEditTargetId=id; document.getElementById('weightEditVal').value=t.weight; const dt=new Date(t.time); document.getElementById('weightEditDate').value=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; document.getElementById('weightEditTime').value=`${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`; document.getElementById('weightEditModal').style.display='flex';};
+  window.closeWeightEditModal=()=>{document.getElementById('weightEditModal').style.display='none'; weightEditTargetId=null;};
+  window.openGoalModal=()=>{document.getElementById('goalInput').value=targetWeight||''; document.getElementById('goalModal').style.display='flex';};
+  window.closeGoalModal=()=>{document.getElementById('goalModal').style.display='none';};
+  window.saveGoalWeight=()=>{const v=parseFloat(document.getElementById('goalInput').value); if(isNaN(v)||v<=0)return alert("값 확인"); targetWeight=v; localStorage.setItem('weight_target_v1',targetWeight); updateWeightUI(); closeGoalModal();};
+  window.openWeightResetModal=()=>{document.getElementById('weightResetModal').style.display='flex';};
+  window.closeWeightResetModal=()=>{document.getElementById('weightResetModal').style.display='none';};
+  window.toggleWeightSelectAll=()=>{const c=document.querySelectorAll('.weight-history-chk'); const a=Array.from(c).every(cb=>cb.checked); c.forEach(cb=>cb.checked=!a);};
+
 </script>
 </body>
 </html>
