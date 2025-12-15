@@ -58,18 +58,18 @@
   input[type="date"], input[type="time"] { flex: 1; padding: 0; justify-content: center; display: flex; align-items: center; }
   .btn-now { background: #6c757d; flex: 0 0 50px; font-size: 13px; padding: 0; }
 
-  /* [수정됨] 펩타이드 매니저 상단 입력창 정렬 수정 */
+  /* 펩타이드 매니저 상단 입력창 정렬 수정 */
   select#drugType { 
-      flex: 1.6; /* 비율 조정 */
-      width: 0;  /* 중요: flex 컨테이너 안에서 넘치지 않게 함 */
+      flex: 1.6; 
+      width: 0; 
       background: #f9f9f9; 
       font-weight: bold; 
       text-align-last: center; 
       min-width: 0; 
   }
   input#doseAmt { 
-      flex: 1;   /* 비율 조정 */
-      width: 0;  /* 중요: flex 컨테이너 안에서 넘치지 않게 함 */
+      flex: 1; 
+      width: 0; 
       min-width: 0; 
   }
 
@@ -694,6 +694,11 @@ function getNowTimeString() { const n=new Date(); return `${String(n.getHours())
 function checkDate(el) { if(!el.value) el.value = getTodayString(); }
 function checkTime(el) { if(!el.value) el.value = getNowTimeString(); }
 function checkRangeInput(el) { if (!el.value) el.value = getTodayString(); }
+// [추가] 로컬 시간 기준 날짜 변환 함수 (버그 수정용)
+function toLocalYMD(val) {
+    const d = new Date(val);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
 // =================================================================
 // 1. 잔여량 계산기 로직
@@ -807,16 +812,18 @@ function initDateRange() {
     const s = new Date(Date.now() - 5*86400000);
     const e = new Date(Date.now() + 45*86400000);
     if(doses.length>0 && doses[0].time < s.getTime()) s.setTime(doses[0].time);
-    document.getElementById('searchStart').value = s.toISOString().split('T')[0];
-    document.getElementById('searchEnd').value = e.toISOString().split('T')[0];
+    // [수정] toISOString() 대신 로컬 시간 변환 함수 사용
+    document.getElementById('searchStart').value = toLocalYMD(s);
+    document.getElementById('searchEnd').value = toLocalYMD(e);
 }
 function setFullRange() {
     let target = doses;
     if(viewMode!=='all') target = doses.filter(d=>d.type===viewMode);
     if(!target.length) { initDateRange(); searchUpdate(); return; }
     const ts = target.map(d=>d.time);
-    document.getElementById('searchStart').value = new Date(Math.min(...ts)).toISOString().split('T')[0];
-    document.getElementById('searchEnd').value = new Date(Math.max(...ts)+45*86400000).toISOString().split('T')[0];
+    // [수정] toISOString() 대신 로컬 시간 변환 함수 사용
+    document.getElementById('searchStart').value = toLocalYMD(Math.min(...ts));
+    document.getElementById('searchEnd').value = toLocalYMD(Math.max(...ts)+45*86400000);
     searchUpdate();
 }
 function searchUpdate() { currentPage = 1; update(); }
@@ -1132,15 +1139,17 @@ function initWeightDateRange() {
         const minTime = Math.min(...weightData.map(d=>d.time));
         if (minTime < s.getTime()) s.setTime(minTime);
     }
-    document.getElementById('searchWeightStart').value = s.toISOString().split('T')[0];
-    document.getElementById('searchWeightEnd').value = e.toISOString().split('T')[0];
+    // [수정] toISOString() 대신 로컬 시간 변환 함수 사용
+    document.getElementById('searchWeightStart').value = toLocalYMD(s);
+    document.getElementById('searchWeightEnd').value = toLocalYMD(e);
 }
 
 function setWeightFullRange() {
     if(weightData.length === 0) { initWeightDateRange(); updateWeightUI(); return; }
     const times = weightData.map(d=>d.time);
-    document.getElementById('searchWeightStart').value = new Date(Math.min(...times)).toISOString().split('T')[0];
-    document.getElementById('searchWeightEnd').value = new Date(Math.max(...times)).toISOString().split('T')[0];
+    // [수정] toISOString() 대신 로컬 시간 변환 함수 사용
+    document.getElementById('searchWeightStart').value = toLocalYMD(Math.min(...times));
+    document.getElementById('searchWeightEnd').value = toLocalYMD(Math.max(...times));
     searchWeightUpdate();
 }
 
@@ -1149,14 +1158,10 @@ function searchWeightUpdate() {
     updateWeightUI();
 }
 
-// [수정됨] ID 충돌 해결
 function setWeightDisplayType(type) {
     weightDisplayType = type;
-    
-    // 변경된 ID로 참조 수정
     document.getElementById('btnWeightShowGraph').classList.toggle('active', type === 'chart');
     document.getElementById('btnWeightShowList').classList.toggle('active', type === 'list');
-    
     document.getElementById('weightChartArea').style.display = type === 'chart' ? 'block' : 'none';
     document.getElementById('weightDailyListArea').style.display = type === 'list' ? 'block' : 'none';
     
