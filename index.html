@@ -58,17 +58,20 @@
   input[type="date"], input[type="time"] { flex: 1; padding: 0; justify-content: center; display: flex; align-items: center; }
   .btn-now { background: #6c757d; flex: 0 0 50px; font-size: 13px; padding: 0; }
 
-  /* [수정됨] 펩타이드 매니저 상단 입력창 정렬 */
+  /* [수정됨] 펩타이드 매니저 상단 입력창 정렬 수정 */
   select#drugType { 
-      flex: 1.6; 
-      width: 0; 
+      flex: 1.6; /* 비율 조정 */
+      width: 0;  /* 중요: flex 컨테이너 안에서 넘치지 않게 함 */
       background: #f9f9f9; 
       font-weight: bold; 
       text-align-last: center; 
       min-width: 0; 
-      color: #36a2eb; /* 파란색 */
   }
-  input#doseAmt { flex: 1; width: 0; min-width: 0; }
+  input#doseAmt { 
+      flex: 1;   /* 비율 조정 */
+      width: 0;  /* 중요: flex 컨테이너 안에서 넘치지 않게 함 */
+      min-width: 0; 
+  }
 
   /* 체크박스 */
   input[type="checkbox"] {
@@ -176,23 +179,7 @@
   .pill.active { background: #333; color: white; border-color: #333; }
 
   .calc-input { width: 100%; font-size: 16px; height: 46px; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: white; margin-bottom: 5px;}
-  
-  /* [수정됨] 펩타이드 계산기 선택박스 스타일 (파란색, 가운데 정렬) */
-  .calc-select { 
-      width: 100%; 
-      font-size: 16px; 
-      height: 46px; 
-      border: 1px solid #ddd; 
-      border-radius: 8px; 
-      text-align: center; 
-      text-align-last: center; /* 가운데 정렬 핵심 */
-      background: white; 
-      margin-bottom: 5px; 
-      -webkit-appearance: none; 
-      font-weight: bold; 
-      color: #36a2eb; /* 파란색 글씨 */
-  }
-  
+  .calc-select { width: 100%; font-size: 16px; height: 46px; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: white; margin-bottom: 5px; -webkit-appearance: none; font-weight: bold; }
   .muted-text { font-size: 0.85em; color: #27ae60; margin-top: 4px; font-weight: bold; text-align: center; min-height: 1.2em;}
   
   .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; border-top: 2px dashed #eee; padding-top: 20px; }
@@ -448,9 +435,7 @@
                 <div class="result-sub" id="vialRemain" style="color:#e74c3c;"></div>
             </div>
         </div>
-        
         <div id="penWarning" style="color:#e74c3c; font-weight:bold; text-align:center; margin-top:10px; display:none;"></div>
-        
         <div class="result-box" id="monthlyCostBox" style="display:none; margin-top:10px; background:#fdfefe; border-color:#3498db;">
             <div class="result-title" style="color:#3498db;">월 예상 비용</div>
             <div class="result-val" id="monthlyCostValue">-</div>
@@ -468,7 +453,7 @@
       </div>
       <div class="input-group" style="margin-bottom: 20px;">
         <input type="number" id="userAge" placeholder="나이" style="flex:1;" oninput="saveWeightProfile()">
-        <select id="userGender" style="flex:1; background:#f9f9f9; font-weight:bold; text-align-last:center; color:#36a2eb;" onchange="saveWeightProfile()">
+        <select id="userGender" style="flex:1; background:#f9f9f9; font-weight:bold; text-align-last:center;" onchange="saveWeightProfile()">
             <option value="M">남성</option>
             <option value="F">여성</option>
         </select>
@@ -522,8 +507,8 @@
       </div>
 
       <div class="view-toggle-container">
-        <button class="view-btn active" id="btnShowGraph" onclick="setWeightDisplayType('chart')">📊 그래프 보기</button>
-        <button class="view-btn" id="btnShowList" onclick="setWeightDisplayType('list')">📝 목록 보기</button>
+        <button class="view-btn active" id="btnWeightShowGraph" onclick="setWeightDisplayType('chart')">📊 그래프 보기</button>
+        <button class="view-btn" id="btnWeightShowList" onclick="setWeightDisplayType('list')">📝 목록 보기</button>
       </div>
 
       <div id="weightChartArea">
@@ -930,32 +915,11 @@ function openResetModal() {
     document.getElementById('resetError').style.display = 'none'; document.getElementById('resetModal').style.display = 'flex';
 }
 function closeResetModal() { document.getElementById('resetModal').style.display = 'none'; }
-
-// [수정된 함수] 데이터 초기화 확인
 function confirmReset() {
-    const t = document.getElementById('checkTirz').checked;
-    const r = document.getElementById('checkReta').checked;
-    const s = document.getElementById('checkSema').checked;
-
-    if(!t && !r && !s) { 
-        document.getElementById('resetError').style.display = 'block'; 
-        return; 
-    }
-
-    if(t) doses = doses.filter(d => d.type !== 'tirz'); 
-    if(r) doses = doses.filter(d => d.type !== 'reta'); 
-    if(s) doses = doses.filter(d => d.type !== 'sema');
-
-    currentHistoryPage = 1; 
-    save(); 
-    
-    // 모달을 먼저 닫아 화면 멈춤 현상 방지
-    closeResetModal(); 
-    
-    // 약간의 지연 후 화면 갱신
-    setTimeout(() => {
-        update();
-    }, 50);
+    const t = document.getElementById('checkTirz').checked, r = document.getElementById('checkReta').checked, s = document.getElementById('checkSema').checked;
+    if(!t && !r && !s) { document.getElementById('resetError').style.display = 'block'; return; }
+    if(t) doses = doses.filter(d=>d.type!=='tirz'); if(r) doses = doses.filter(d=>d.type!=='reta'); if(s) doses = doses.filter(d=>d.type!=='sema');
+    currentHistoryPage=1; save(); update(); closeResetModal();
 }
 
 function drawChart() {
@@ -1024,6 +988,47 @@ function drawChart() {
              el.innerHTML = html;
         }
     }
+}
+
+function renderDailyTable() {
+    const tbody = document.getElementById('dailyTableBody'); tbody.innerHTML = '';
+    const thead = document.querySelector('#dailyTable thead tr');
+    let th = '<th style="width:25%">날짜</th>';
+    if(viewMode==='all'||viewMode==='tirz') th+='<th style="color:#36a2eb">터제</th>';
+    if(viewMode==='all'||viewMode==='reta') th+='<th style="color:#ff6384">레타</th>';
+    if(viewMode==='all'||viewMode==='sema') th+='<th style="color:#28a745">세마</th>';
+    thead.innerHTML = th;
+    
+    const sStr = document.getElementById('searchStart').value;
+    const eStr = document.getElementById('searchEnd').value;
+    const nowTs = new Date().getTime();
+    let s = sStr ? new Date(sStr).getTime() : nowTs - 5*86400000;
+    let e = eStr ? new Date(eStr).getTime() : nowTs + 45*86400000;
+    if(!sStr && doses.length) s = doses[0].time;
+
+    let dateList = []; for(let t=s; t<=e; t+=86400000) dateList.push(t);
+    const totalPages = Math.ceil(dateList.length / itemsPerPage);
+    if(currentPage>totalPages) currentPage=1;
+    
+    const pageList = dateList.slice((currentPage-1)*itemsPerPage, currentPage*itemsPerPage);
+    const todayStr = new Date().toDateString();
+
+    pageList.forEach(t => {
+        const d = new Date(t);
+        const dateStr = `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()} (${['일','월','화','수','목','금','토'][d.getDay()]})`;
+        const tr = document.createElement('tr');
+        if(d.toDateString() === todayStr) tr.className = 'today-row';
+        
+        const getBadge = (type) => doses.filter(x => new Date(x.time).toDateString() === d.toDateString() && x.type===type).map(x=>`<span class="dose-badge">💉 ${x.amt}mg</span>`).join('');
+        
+        let html = `<td class="date-col">${dateStr}</td>`;
+        if(viewMode==='all'||viewMode==='tirz') html += `<td class="val-col" style="color:#36a2eb">${calculateTotalLevel(t,'tirz').toFixed(2)}${getBadge('tirz')}</td>`;
+        if(viewMode==='all'||viewMode==='reta') html += `<td class="val-col" style="color:#ff6384">${calculateTotalLevel(t,'reta').toFixed(2)}${getBadge('reta')}</td>`;
+        if(viewMode==='all'||viewMode==='sema') html += `<td class="val-col" style="color:#28a745">${calculateTotalLevel(t,'sema').toFixed(2)}${getBadge('sema')}</td>`;
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+    });
+    renderPagination('paginationControls', totalPages, currentPage, (p)=>{currentPage=p; renderDailyTable();});
 }
 
 // =================================================================
@@ -1144,10 +1149,14 @@ function searchWeightUpdate() {
     updateWeightUI();
 }
 
+// [수정됨] ID 충돌 해결
 function setWeightDisplayType(type) {
     weightDisplayType = type;
-    document.getElementById('btnShowGraph').classList.toggle('active', type === 'chart');
-    document.getElementById('btnShowList').classList.toggle('active', type === 'list');
+    
+    // 변경된 ID로 참조 수정
+    document.getElementById('btnWeightShowGraph').classList.toggle('active', type === 'chart');
+    document.getElementById('btnWeightShowList').classList.toggle('active', type === 'list');
+    
     document.getElementById('weightChartArea').style.display = type === 'chart' ? 'block' : 'none';
     document.getElementById('weightDailyListArea').style.display = type === 'list' ? 'block' : 'none';
     
@@ -1203,7 +1212,10 @@ function getDailyLatestData() {
         if (d.time < startTime || d.time > endTime) return;
         const dt = new Date(d.time);
         const dateKey = `${dt.getFullYear()}-${dt.getMonth()+1}-${dt.getDate()}`;
-        if (!dailyMap[dateKey] || d.time >= dailyMap[dateKey].time) { dailyMap[dateKey] = d; }
+        // 같은 날짜면 시간 비교해서 최신값으로 덮어씀 (>= 사용)
+        if (!dailyMap[dateKey] || d.time >= dailyMap[dateKey].time) {
+            dailyMap[dateKey] = d;
+        }
     });
     return Object.values(dailyMap).sort((a, b) => a.time - b.time);
 }
