@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>펩타이드 매니저</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>펩타이드 통합 매니저</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <style>
-  /* 기본 설정 */
+  /* ================= [왼쪽 탭 원본 스타일 유지] ================= */
   * {
     -webkit-touch-callout: none; 
     -webkit-user-select: none;   
@@ -19,15 +20,21 @@
 
   input, select { -webkit-user-select: auto; user-select: auto; }
 
-  body { padding: 20px; background: #f4f7f6; max-width: 800px; margin: 0 auto; touch-action: manipulation; color: #333; padding-bottom: 80px; }
-  .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+  body { 
+      padding: 20px; 
+      background: #f4f7f6; 
+      max-width: 800px; 
+      margin: 0 auto; 
+      touch-action: manipulation; 
+      color: #333; 
+      padding-bottom: 80px; /* 하단 탭바 공간 확보 */
+  }
+  
+  /* 메인 컨테이너 스타일 (양쪽 탭 공통 적용) */
+  .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;}
   h2 { text-align: center; color: #333; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
   
-  /* 입력 그룹 */
-  .input-group { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: nowrap; }
-  .date-time-group { display: flex; gap: 5px; width: 100%; margin-bottom: 15px; }
-  
-  /* 공통 입력창 스타일 */
+  /* 공통 입력창 스타일 (오른쪽 탭에도 적용됨) */
   select, input, button { 
       padding: 0 5px; 
       border-radius: 8px; 
@@ -40,64 +47,33 @@
       -webkit-appearance: none; 
   }
   
-  /* 체크박스 스타일 */
-  input[type="checkbox"] {
-      -webkit-appearance: checkbox !important;
-      appearance: checkbox !important;
-      width: 24px !important; 
-      height: 24px !important; 
-      cursor: pointer;
-      accent-color: #007bff; 
-      margin-right: 10px;
-      vertical-align: middle;
-      background: none !important;
-      border: none !important;
-      padding: 0 !important;
-  }
+  input:focus, select:focus { outline: none; border-color: #333; }
+
+  /* 버튼 스타일 */
+  button { cursor: pointer; color: white; border: none; font-weight: bold; transition: 0.2s; }
+  .btn-add { background: #28a745; width: 100%; margin-bottom: 20px; font-size: 1.1rem; } /* 초록색 버튼 */
+  .btn-reset { width: 100%; background: #6c757d; margin-top: 20px; padding:0; border-radius:8px; color:white; border:none; font-weight:bold; height: 46px; } /* 회색 버튼 */
   
-  /* 기록 리스트용 체크박스 스타일 */
-  .history-chk {
-      width: 20px !important; 
-      height: 20px !important; 
-      margin-right: 15px !important;
-      accent-color: #dc3545; /* 삭제용이라 빨간색 계열 */
+  /* ================= [왼쪽 탭 전용 CSS] ================= */
+  .input-group { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: nowrap; }
+  .date-time-group { display: flex; gap: 5px; width: 100%; margin-bottom: 15px; }
+  
+  input[type="checkbox"] {
+      -webkit-appearance: checkbox !important; appearance: checkbox !important;
+      width: 24px !important; height: 24px !important; 
+      margin-right: 10px; vertical-align: middle;
+      background: none !important; border: none !important;
   }
+  .history-chk { width: 20px !important; height: 20px !important; margin-right: 15px !important; accent-color: #dc3545; }
 
   select#drugType { flex: 2; background: #f9f9f9; font-weight: bold; text-align-last: center; min-width: 0; }
   input#doseAmt { flex: 1; min-width: 0; }
-  
-  input[type="date"], input[type="time"] {
-      flex: 1; font-family: inherit; color: #333; padding: 0;
-      justify-content: center; display: flex; align-items: center;
-  }
+  input[type="date"], input[type="time"] { flex: 1; padding: 0; justify-content: center; display: flex; align-items: center; }
 
-  button { cursor: pointer; color: white; border: none; font-weight: bold; transition: 0.2s; }
-  
-  .btn-add { background: #28a745; width: 100%; margin-bottom: 20px; font-size: 1.1rem; }
-  .btn-add:hover { background: #218838; }
   .btn-now { background: #6c757d; flex: 0 0 50px; font-size: 13px; padding: 0; }
   
-  /* 상태 카드 보드 */
-  .status-board { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 10px; 
-      margin: 10px 0 20px; 
-  }
-  
-  /* 상태 카드 */
-  .status-card { 
-      display: flex; 
-      flex-direction: row; 
-      align-items: center; 
-      justify-content: space-between; 
-      padding: 15px 20px; 
-      border-radius: 12px; 
-      text-align: left; 
-      color: white; 
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-      width: 100%;
-  }
+  .status-board { display: flex; flex-direction: column; gap: 10px; margin: 10px 0 20px; }
+  .status-card { display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; border-radius: 12px; text-align: left; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 100%; }
   
   .card-tirz { background: linear-gradient(90deg, #36a2eb, #0056b3); } 
   .card-reta { background: linear-gradient(90deg, #ff6384, #c82333); } 
@@ -106,151 +82,48 @@
   .drug-name { font-size: 1rem; font-weight: bold; margin-bottom: 0; flex: 1; }
   .current-val { font-size: 1.4rem; font-weight: bold; margin: 0 15px; white-space: nowrap; }
   .unit { font-size: 0.6em; font-weight: normal; }
+  .edit-btn { background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; height: auto; white-space: nowrap; }
 
-  /* 수정 버튼 */
-  .edit-btn {
-    background: rgba(255,255,255,0.25); 
-    border: 1px solid rgba(255,255,255,0.5); 
-    color: white;
-    padding: 6px 12px; 
-    border-radius: 20px; 
-    font-size: 0.85rem; 
-    cursor: pointer; 
-    margin-top: 0; 
-    display: inline-block; 
-    height: auto;
-    white-space: nowrap;
-  }
-
-  /* 조회 기간 설정 박스 */
-  /* 박스 내부 여백을 줄여서 입력 공간 확보 */
-  .date-range-box {
-      background: #f1f3f5; padding: 12px 8px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e9ecef;
-  }
-  
-  .range-header {
-      display: flex; 
-      flex-direction: row; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 10px;
-      padding: 0 4px;
-  }
-  
-  .range-title { 
-      font-size: 0.95rem; 
-      font-weight: bold; 
-      color: #333; 
-      white-space: nowrap; 
-  }
-  
-  .btn-full-range {
-      background: #6c757d; color: white; font-size: 0.8rem; padding: 6px 12px; height: auto; border-radius: 20px; width: auto; white-space: nowrap; flex-shrink: 0;
-  }
-
-  /* 수정된 부분: gap을 줄이고 글자 크기 조정 */
+  /* 기간 조회 및 차트 */
+  .date-range-box { background: #f1f3f5; padding: 12px 8px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e9ecef; }
+  .range-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 4px; }
+  .range-title { font-size: 0.95rem; font-weight: bold; color: #333; }
+  .btn-full-range { background: #6c757d; color: white; font-size: 0.8rem; padding: 6px 12px; height: auto; border-radius: 20px; width: auto; }
   .range-inputs { display: flex; gap: 3px; align-items: center; }
-  
-  .range-inputs input[type="date"] {
-      flex: 1; 
-      min-width: 0; 
-      font-size: 13px; /* 글자 크기 축소 */
-      letter-spacing: -0.5px; /* 자간 축소 */
-      padding: 0; 
-      background: #fff;
-  }
-
+  .range-inputs input[type="date"] { font-size: 13px; letter-spacing: -0.5px; background: #fff; }
   .btn-search { background: #36a2eb; color: white; flex: 0 0 50px; font-size: 0.9rem; border-radius: 8px; padding: 0; }
 
-  /* 보기 모드 토글 */
   .view-toggle-container { display: flex; background: #e9ecef; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
   .view-btn { flex: 1; background: transparent; color: #666; border: none; font-size: 0.95rem; height: 40px; border-radius: 8px; }
   .view-btn.active { background: white; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-  /* 탭 버튼 */
   .tab-container { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; }
-  .tab-btn {
-    padding: 0 12px; border-radius: 20px; border: 1px solid #ddd; background: #f8f9fa; color: #555;
-    font-size: 0.9em; font-weight: bold; transition: 0.2s; flex: 1; max-width: 100px;
-    height: 36px; line-height: 34px; white-space: nowrap;
-  }
+  .tab-btn { padding: 0 12px; border-radius: 20px; border: 1px solid #ddd; background: #f8f9fa; color: #555; font-size: 0.9em; font-weight: bold; transition: 0.2s; flex: 1; max-width: 100px; height: 36px; line-height: 34px; white-space: nowrap; }
   .tab-btn.active { background: #333; color: white; border-color: #333; }
   
-  /* 차트 영역 */
   .chart-box { height: 300px; position: relative; margin-bottom: 0px; display: block; }
-  
-  /* 그래프 터치 시 페이지 스크롤 방지 */
   canvas { touch-action: none; }
-
-  /* 상단 툴팁 박스 */
-  #chartTooltip {
-      background: #333;
-      color: white;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 10px; 
-      min-height: 50px;
-      text-align: center;
-      font-size: 0.9rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
+  
+  /* 툴팁 및 테이블 */
+  #chartTooltip { background: #333; color: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; min-height: 50px; text-align: center; font-size: 0.9rem; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
   .tooltip-date { font-weight: bold; margin-bottom: 6px; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; width: 100%; }
-  
-  .tooltip-doses {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 8px; 
-      width: 100%;
-      flex-wrap: wrap;
-  }
-  
-  .tooltip-dose-badge {
-      background: rgba(255, 255, 255, 0.15);
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 0.9em;
-      color: #ffda44;
-      font-weight: bold;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
+  .tooltip-doses { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; width: 100%; flex-wrap: wrap; }
+  .tooltip-dose-badge { background: rgba(255, 255, 255, 0.15); padding: 3px 8px; border-radius: 6px; font-size: 0.9em; color: #ffda44; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.3); }
   .tooltip-body { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; width: 100%; }
   .tooltip-item { display: flex; align-items: center; gap: 6px; font-size: 0.95rem; }
-  
-  /* 네모 박스 스타일 */
-  .color-square { 
-      width: 12px; 
-      height: 12px; 
-      display: inline-block; 
-      border-radius: 2px;
-      box-shadow: 0 0 2px rgba(0,0,0,0.5);
-  }
+  .color-square { width: 12px; height: 12px; display: inline-block; border-radius: 2px; box-shadow: 0 0 2px rgba(0,0,0,0.5); }
 
-  /* 목록 영역 */
   .list-wrapper { display: none; }
   .daily-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 0.85em; table-layout: fixed; }
   .daily-table th, .daily-table td { padding: 8px 2px; text-align: center; border-bottom: 1px solid #eee; vertical-align: middle; }
   .daily-table th { background: #f8f9fa; color: #555; font-weight: bold; }
   .daily-table .today-row { background-color: #fff9c4; font-weight: bold; border-left: 3px solid #ffc107; border-right: 3px solid #ffc107; }
-  
   .val-col { font-weight: bold; font-size: 0.95em; line-height: 1.2; }
   .date-col { color: #666; font-size: 0.9em; letter-spacing: -0.5px; }
   .dose-badge { display: block; font-size: 0.75em; color: #dc3545; font-weight: normal; margin-top: 2px; }
-
-  /* 페이지네이션 */
-  .pagination-container {
-      display: flex; justify-content: center; align-items: center; gap: 5px; margin-bottom: 30px;
-  }
-  .page-btn {
-      min-width: 32px; height: 32px; padding: 0 5px; border-radius: 5px; border: 1px solid #ddd; background: white; color: #555;
-      font-size: 0.9em; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center;
-  }
+  
+  .pagination-container { display: flex; justify-content: center; gap: 5px; margin-bottom: 30px; }
+  .page-btn { min-width: 32px; height: 32px; padding: 0 5px; border-radius: 5px; border: 1px solid #ddd; background: white; color: #555; font-size: 0.9em; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; }
   .page-btn.active { background: #333; color: white; border-color: #333; }
   .page-btn:disabled { opacity: 0.5; cursor: default; }
 
@@ -258,43 +131,13 @@
   .history-box { border-top: 2px solid #eee; padding-top: 20px; }
   .list-item { display: flex; justify-content: space-between; padding: 15px 5px; border-bottom: 1px solid #f0f0f0; align-items: center; }
   .tag { padding: 4px 8px; border-radius: 4px; color: white; font-size: 0.8em; margin-right: 10px; font-weight: bold; }
-  .tag.tirz { background: #36a2eb; }
-  .tag.reta { background: #ff6384; }
-  .tag.sema { background: #28a745; }
+  .tag.tirz { background: #36a2eb; } .tag.reta { background: #ff6384; } .tag.sema { background: #28a745; }
   .manual-tag { color: #dc3545; font-size: 0.75em; margin-left: 5px; font-weight: bold; }
-
   .action-group { display: flex; gap: 10px; }
   .list-btn { background: none; border: none; font-size: 1.4em; padding: 10px; color: #aaa; cursor: pointer; height: auto; min-width: 40px; }
-  
-  .btn-reset { width: 100%; background: #6c757d; margin-top: 20px; padding:0; border-radius:8px; color:white; border:none; font-weight:bold; height: 46px; }
-  
-  /* 선택 삭제 버튼 스타일 */
-  .btn-del-sel {
-      background: #dc3545; 
-      color: white; 
-      border: none; 
-      padding: 5px 10px; 
-      border-radius: 5px; 
-      font-size: 0.85rem; 
-      font-weight: bold; 
-      cursor: pointer;
-  }
-
-  /* 전체 선택 버튼 스타일 */
-  .btn-select-all {
-      background: #6c757d; 
-      color: white; 
-      border: none; 
-      padding: 5px 10px; 
-      border-radius: 5px; 
-      font-size: 0.85rem; 
-      font-weight: bold; 
-      cursor: pointer;
-  }
-  
-  .btn-settings-float { 
-      margin-top: 15px; width: 100%; background: #f8f9fa; border: 1px solid #ddd; color: #555; font-weight: bold; 
-  }
+  .btn-del-sel { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+  .btn-select-all { background: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+  #historyFilter { background: #f8f9fa; border:1px solid #ddd; font-weight:bold; color:#555; height: 32px; font-size: 0.85rem; width: auto; text-align-last: center; }
 
   /* 모달 */
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 9999; }
@@ -304,128 +147,304 @@
   .modal-input { width: 100%; height: 46px; padding: 0 10px; font-size: 16px; margin-bottom: 15px; border: 2px solid #36a2eb; border-radius: 8px; background-color: white; display: block; text-align: center; }
   .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
   .btn-pop { flex: 1; padding: 0; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; height: 46px; }
-  .bg-blue { background: #36a2eb; }
-  .bg-red { background: #dc3545; }
-  .bg-gray { background: #6c757d; }
-  
+  .bg-blue { background: #36a2eb; } .bg-red { background: #dc3545; } .bg-gray { background: #6c757d; }
   .chk-label { display: flex; align-items: center; margin-bottom: 10px; font-size: 1rem; cursor: pointer; justify-content: flex-start; padding-left: 10px;}
+
+  /* ================= [오른쪽 탭 스타일 (왼쪽과 디자인 통일)] ================= */
+  .calc-sub-title { font-size: 1rem; font-weight: bold; color: #555; margin: 20px 0 10px 0; display: flex; align-items: center; }
+  .calc-sub-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background: #27ae60; margin-right: 8px; border-radius: 2px; }
   
-  /* 슬라이더 */
-  input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: auto; border:none;}
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #36a2eb; cursor: pointer; margin-top: -8px; }
-  input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #ddd; border-radius: 2px; }
+  .calc-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 10px; }
+  @media (min-width: 600px) { .calc-grid { grid-template-columns: repeat(2, 1fr); } }
   
-  /* 필터 셀렉트 */
-  #historyFilter {
-      background: #f8f9fa; border:1px solid #ddd; font-weight:bold; color:#555;
-      height: 32px; font-size: 0.85rem; width: auto; text-align-last: center;
+  .calc-group { background: #fafafa; padding: 15px; border-radius: 10px; border: 1px solid #eee; }
+  .input-label { font-size: 0.9rem; color: #666; font-weight: 600; margin-bottom: 8px; display: block; text-align: left; }
+  
+  /* 알약(Pill) 버튼을 왼쪽 탭 버튼 스타일로 변경 */
+  .pill-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .pill { 
+      padding: 0 12px; border-radius: 20px; border: 1px solid #ddd; background: #f8f9fa; color: #555; 
+      font-size: 0.9em; font-weight: bold; flex: 1; height: 36px; line-height: 34px; white-space: nowrap; cursor: pointer; text-align: center;
   }
+  .pill.active { background: #333; color: white; border-color: #333; }
+
+  /* 입력창 (왼쪽 탭 스타일 상속) */
+  .calc-input { width: 100%; font-size: 16px; height: 46px; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: white; margin-bottom: 5px;}
+  .calc-select { width: 100%; font-size: 16px; height: 46px; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: white; margin-bottom: 5px; -webkit-appearance: none; font-weight: bold; }
+  
+  .muted-text { font-size: 0.85em; color: #27ae60; margin-top: 4px; font-weight: bold; text-align: center; min-height: 1.2em;}
+  
+  /* 결과 박스 수정됨: 상단 정렬(flex-start) 및 값의 중앙 정렬(margin auto) 적용 */
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; border-top: 2px dashed #eee; padding-top: 20px; }
+  
+  .result-box { 
+      background: #e8f6f3; 
+      padding: 15px; 
+      border-radius: 12px; 
+      text-align: center; 
+      border: 1px solid #27ae60; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: flex-start; /* 제목을 항상 맨 위로 보냄 */
+      align-items: center; 
+  }
+  
+  .result-title { font-size: 0.85em; color: #27ae60; font-weight: bold; margin-bottom: 5px; }
+  
+  .result-val { 
+      font-size: 1.2em; 
+      font-weight: bold; 
+      color: #333; 
+      margin-top: auto;    /* 위쪽 여백 자동 (제목과 떨어짐) */
+      margin-bottom: auto; /* 아래쪽 여백 자동 (부제목과 떨어짐) */
+      width: 100%;
+  }
+  
+  .result-sub { font-size: 0.8em; color: #777; margin-top: 2px; }
+
+  .error-box { background-color: #fdecea; color: #e74c3c; padding: 14px; border-radius: 10px; margin-bottom: 15px; display: none; font-weight: bold; text-align: center;}
+
+  /* ================= [하단 고정 네비게이션] ================= */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; width: 100%; height: 60px;
+    background: white; display: flex; justify-content: space-around; align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 9999; border-top: 1px solid #eee;
+  }
+  .nav-item { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #999; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
+  .nav-item.active { color: #333; }
+  .nav-icon { font-size: 1.4rem; margin-bottom: 3px; }
+
+  /* 페이지 섹션 토글 */
+  .page-section { display: none; animation: fadeIn 0.2s ease-in-out; }
+  .page-section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0.8; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>💉 펩타이드 매니저</h2>
-  
-  <div class="input-group">
-    <select id="drugType">
-      <option value="tirz">터제파타이드 (5일)</option>
-      <option value="reta">레타트루타이드 (6일)</option>
-      <option value="sema">세마글루타이드 (7일)</option>
-    </select>
-    <input type="number" id="doseAmt" placeholder="용량 (mg)" step="0.1">
-  </div>
-  
-  <div class="date-time-group">
-    <input type="date" id="inputDate" oninput="checkDate(this)">
-    <input type="time" id="inputTime" oninput="checkTime(this)">
-    <button class="btn-now" type="button" onclick="setNow()">현재</button> 
-  </div>
-  
-  <button class="btn-add" type="button" onclick="add()">+ 기록 추가</button>
-
-  <div class="status-board">
-    <div class="status-card card-tirz">
-      <div class="drug-name">터제파타이드</div>
-      <div class="current-val"><span id="valTirz">0.00</span> <span class="unit">mg</span></div>
-      <button class="edit-btn" onclick="openEditModal('tirz')">수정</button>
-    </div>
-    <div class="status-card card-reta">
-      <div class="drug-name">레타트루타이드</div>
-      <div class="current-val"><span id="valReta">0.00</span> <span class="unit">mg</span></div>
-      <button class="edit-btn" onclick="openEditModal('reta')">수정</button>
-    </div>
-    <div class="status-card card-sema">
-      <div class="drug-name">세마글루타이드</div>
-      <div class="current-val"><span id="valSema">0.00</span> <span class="unit">mg</span></div>
-      <button class="edit-btn" onclick="openEditModal('sema')">수정</button>
-    </div>
-  </div>
-
-  <div class="date-range-box">
-      <div class="range-header">
-          <div class="range-title">📅 조회 기간 설정</div>
-          <button class="btn-full-range" onclick="setFullRange()">🔄 전체 기간</button>
+<div id="section-manager" class="page-section active">
+    <div class="container">
+      <h2>💉 펩타이드 매니저</h2>
+      
+      <div class="input-group">
+        <select id="drugType">
+          <option value="tirz">터제파타이드 (5일)</option>
+          <option value="reta">레타트루타이드 (6일)</option>
+          <option value="sema">세마글루타이드 (7일)</option>
+        </select>
+        <input type="number" id="doseAmt" placeholder="용량 (mg)" step="0.1">
       </div>
-      <div class="range-inputs">
-          <input type="date" id="searchStart" onchange="checkRangeInput(this)">
-          <span>~</span>
-          <input type="date" id="searchEnd" onchange="checkRangeInput(this)">
-          <button class="btn-search" onclick="searchUpdate()">조회</button>
+      
+      <div class="date-time-group">
+        <input type="date" id="inputDate" oninput="checkDate(this)">
+        <input type="time" id="inputTime" oninput="checkTime(this)">
+        <button class="btn-now" type="button" onclick="setNow()">현재</button> 
       </div>
-  </div>
-
-  <div class="view-toggle-container">
-    <button class="view-btn active" id="btnShowGraph" onclick="setDisplayType('chart')">📊 그래프 보기</button>
-    <button class="view-btn" id="btnShowList" onclick="setDisplayType('list')">📝 목록 보기</button>
-  </div>
-
-  <div class="tab-container">
-    <button class="tab-btn active" id="btnAll" onclick="setViewMode('all')">전체</button>
-    <button class="tab-btn" id="btnTirz" onclick="setViewMode('tirz')" style="color:#36a2eb;">터제</button>
-    <button class="tab-btn" id="btnReta" onclick="setViewMode('reta')" style="color:#ff6384;">레타</button>
-    <button class="tab-btn" id="btnSema" onclick="setViewMode('sema')" style="color:#28a745;">세마</button>
-  </div>
-
-  <div id="chartTooltip">
-      <span style="color:#aaa;">그래프를 터치하면 상세 정보가 표시됩니다.</span>
-  </div>
-
-  <div class="chart-box" id="chartArea">
-    <canvas id="myChart"></canvas>
-  </div>
-  
-  <div class="list-wrapper" id="listArea">
-      <h3 style="margin:20px 0 10px; font-size:1.1em; color:#555;">📅 일별 농도 (투여일 표시)</h3>
-      <table class="daily-table" id="dailyTable">
-          <thead>
-              <tr>
-                  </tr>
-          </thead>
-          <tbody id="dailyTableBody"></tbody>
-      </table>
-      <div class="pagination-container" id="paginationControls"></div>
-  </div>
-
-  <div id="historySection">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin:30px 0 10px; flex-wrap: wrap; gap: 10px;">
-          <h3 style="margin:0; font-size:1.1em; color:#555; white-space: nowrap;">💉 투약 기록 관리</h3>
-          <div style="display:flex; gap:5px; align-items:center;">
-              <select id="historyFilter" onchange="changeHistoryFilter()">
-                  <option value="all">전체</option>
-                  <option value="tirz">터제</option>
-                  <option value="reta">레타</option>
-                  <option value="sema">세마</option>
-              </select>
-              <button class="btn-select-all" onclick="toggleSelectAll()">전체 선택</button>
-              <button class="btn-del-sel" onclick="askMultiDel()">선택 삭제</button>
+      
+      <button class="btn-add" type="button" onclick="add()">+ 기록 추가</button>
+    
+      <div class="status-board">
+        <div class="status-card card-tirz">
+          <div class="drug-name">터제파타이드</div>
+          <div class="current-val"><span id="valTirz">0.00</span> <span class="unit">mg</span></div>
+          <button class="edit-btn" onclick="openEditModal('tirz')">수정</button>
+        </div>
+        <div class="status-card card-reta">
+          <div class="drug-name">레타트루타이드</div>
+          <div class="current-val"><span id="valReta">0.00</span> <span class="unit">mg</span></div>
+          <button class="edit-btn" onclick="openEditModal('reta')">수정</button>
+        </div>
+        <div class="status-card card-sema">
+          <div class="drug-name">세마글루타이드</div>
+          <div class="current-val"><span id="valSema">0.00</span> <span class="unit">mg</span></div>
+          <button class="edit-btn" onclick="openEditModal('sema')">수정</button>
+        </div>
+      </div>
+    
+      <div class="date-range-box">
+          <div class="range-header">
+              <div class="range-title">📅 조회 기간 설정</div>
+              <button class="btn-full-range" onclick="setFullRange()">🔄 전체 기간</button>
+          </div>
+          <div class="range-inputs">
+              <input type="date" id="searchStart" onchange="checkRangeInput(this)">
+              <span>~</span>
+              <input type="date" id="searchEnd" onchange="checkRangeInput(this)">
+              <button class="btn-search" onclick="searchUpdate()">조회</button>
           </div>
       </div>
-      <div class="history-box" id="historyList"></div>
-      <div class="pagination-container" id="historyPaginationControls"></div>
-  </div>
-  
-  <button class="btn-reset" onclick="openResetModal()">🗑 데이터 초기화</button>
+    
+      <div class="view-toggle-container">
+        <button class="view-btn active" id="btnShowGraph" onclick="setDisplayType('chart')">📊 그래프 보기</button>
+        <button class="view-btn" id="btnShowList" onclick="setDisplayType('list')">📝 목록 보기</button>
+      </div>
+    
+      <div class="tab-container">
+        <button class="tab-btn active" id="btnAll" onclick="setViewMode('all')">전체</button>
+        <button class="tab-btn" id="btnTirz" onclick="setViewMode('tirz')" style="color:#36a2eb;">터제</button>
+        <button class="tab-btn" id="btnReta" onclick="setViewMode('reta')" style="color:#ff6384;">레타</button>
+        <button class="tab-btn" id="btnSema" onclick="setViewMode('sema')" style="color:#28a745;">세마</button>
+      </div>
+    
+      <div id="chartTooltip">
+          <span style="color:#aaa;">그래프를 터치하면 상세 정보가 표시됩니다.</span>
+      </div>
+    
+      <div class="chart-box" id="chartArea">
+        <canvas id="myChart"></canvas>
+      </div>
+      
+      <div class="list-wrapper" id="listArea">
+          <h3 style="margin:20px 0 10px; font-size:1.1em; color:#555;">📅 일별 농도 (투여일 표시)</h3>
+          <table class="daily-table" id="dailyTable">
+              <thead><tr></tr></thead>
+              <tbody id="dailyTableBody"></tbody>
+          </table>
+          <div class="pagination-container" id="paginationControls"></div>
+      </div>
+    
+      <div id="historySection">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin:30px 0 10px; flex-wrap: wrap; gap: 10px;">
+              <h3 style="margin:0; font-size:1.1em; color:#555; white-space: nowrap;">💉 투약 기록 관리</h3>
+              <div style="display:flex; gap:5px; align-items:center;">
+                  <select id="historyFilter" onchange="changeHistoryFilter()">
+                      <option value="all">전체</option>
+                      <option value="tirz">터제</option>
+                      <option value="reta">레타</option>
+                      <option value="sema">세마</option>
+                  </select>
+                  <button class="btn-select-all" onclick="toggleSelectAll()">전체 선택</button>
+                  <button class="btn-del-sel" onclick="askMultiDel()">선택 삭제</button>
+              </div>
+          </div>
+          <div class="history-box" id="historyList"></div>
+          <div class="pagination-container" id="historyPaginationControls"></div>
+      </div>
+      
+      <button class="btn-reset" onclick="openResetModal()">🗑 데이터 초기화</button>
+    </div>
+</div>
+
+<div id="section-calc" class="page-section">
+    <div class="container">
+        <h2>🧮 펩타이드 계산기</h2>
+
+        <div id="calcErrorBox" class="error-box"></div>
+
+        <div class="calc-sub-title">1. 재구성 조건</div>
+        <div class="calc-grid">
+            <div class="calc-group">
+                <span class="input-label">바이알 용량 (mg)</span>
+                <div class="pill-row" data-group="peptide">
+                    <div class="pill" data-value="10">10</div>
+                    <div class="pill" data-value="30">30</div>
+                    <div class="pill" data-value="60">60</div>
+                    <div class="pill" data-value="custom">입력</div>
+                </div>
+                <input type="number" id="peptideMg" class="calc-input" placeholder="예: 10">
+            </div>
+            <div class="calc-group">
+                <span class="input-label">BAC Water (ml)</span>
+                <div class="pill-row" data-group="water">
+                    <div class="pill" data-value="1.8">1.8</div>
+                    <div class="pill" data-value="2.4">2.4</div>
+                    <div class="pill" data-value="3.0">3.0</div>
+                    <div class="pill" data-value="custom">입력</div>
+                </div>
+                <input type="number" id="waterMl" class="calc-input" placeholder="예: 2">
+                <div class="muted-text" id="waterCcText"></div>
+            </div>
+            <div class="calc-group" style="grid-column: 1 / -1;">
+                <span class="input-label">1회 투여량 (mcg)</span>
+                <div class="pill-row" data-group="dose">
+                    <div class="pill" data-value="250">250</div>
+                    <div class="pill" data-value="500">500</div>
+                    <div class="pill" data-value="1000">1000</div>
+                    <div class="pill" data-value="2000">2000</div>
+                    <div class="pill" data-value="4000">4000</div>
+                    <div class="pill" data-value="6000">6000</div>
+                    <div class="pill" data-value="8000">8000</div>
+                    <div class="pill" data-value="10000">10000</div>
+                    <div class="pill" data-value="12000">12000</div>
+                    <div class="pill" data-value="custom">입력</div>
+                </div>
+                <input type="number" id="doseMcg" class="calc-input" placeholder="예: 500">
+                <div class="muted-text" id="doseMgText"></div>
+            </div>
+        </div>
+
+        <div class="calc-sub-title">2. 투여 주기</div>
+        <div class="calc-group" style="display:flex; gap:10px; align-items:flex-end;">
+            <div style="flex:1">
+                <span class="input-label">주기</span>
+                <input type="number" id="intervalCount" class="calc-input" placeholder="1">
+            </div>
+            <div style="flex:1">
+                <span class="input-label">단위</span>
+                <select id="intervalUnit" class="calc-select">
+                    <option value="week" selected>주</option>
+                    <option value="day">일</option>
+                </select>
+            </div>
+            <div style="flex:1">
+                <span class="input-label">횟수</span>
+                <input type="number" id="intervalTimes" class="calc-input" placeholder="1">
+            </div>
+        </div>
+
+        <div class="calc-sub-title">3. 비용 (선택)</div>
+        <div class="calc-group">
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <select id="currencyUnit" class="calc-select">
+                    <option value="">화폐 선택</option>
+                    <option value="KRW">원 (KRW)</option>
+                    <option value="USD">달러 (USD)</option>
+                </select>
+                <select id="peptidePriceType" class="calc-select">
+                    <option value="vial">1병 기준</option>
+                    <option value="kit">1키트(10병)</option>
+                </select>
+            </div>
+            <input type="number" id="peptidePrice" class="calc-input" placeholder="금액 입력">
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-reset" id="resetCalcBtn" style="margin:0; flex:1;">초기화</button>
+            <button class="btn-add" id="calcBtn" style="margin:0; flex:2;">계산하기</button>
+        </div>
+
+        <div class="result-grid">
+            <div class="result-box">
+                <div class="result-title">농도</div>
+                <div class="result-val" id="concMgMl">-</div>
+                <div class="result-sub" id="concMcgMl">-</div>
+            </div>
+            <div class="result-box">
+                <div class="result-title">1회 투여 부피</div>
+                <div class="result-val" id="volMl">-</div>
+                <div class="result-sub" id="volCc">-</div>
+            </div>
+            <div class="result-box">
+                <div class="result-title">인슐린 주사 단위 (U)</div>
+                <div class="result-val" id="uiUnits">-</div>
+                <div class="result-sub">1클릭 = 1U</div>
+            </div>
+            <div class="result-box">
+                <div class="result-title">사용 기간</div>
+                <div class="result-val" id="vialUsage">-</div>
+                <div class="result-sub" id="vialRemain" style="color:#e74c3c;"></div>
+            </div>
+        </div>
+        
+        <div id="penWarning" style="color:#e74c3c; font-weight:bold; text-align:center; margin-top:10px; display:none;"></div>
+        
+        <div class="result-box" id="monthlyCostBox" style="display:none; margin-top:10px; background:#fdfefe; border-color:#3498db;">
+            <div class="result-title" style="color:#3498db;">월 예상 비용</div>
+            <div class="result-val" id="monthlyCostValue">-</div>
+            <div class="result-sub" id="monthlyCostDetail">-</div>
+        </div>
+    </div>
 </div>
 
 <div id="editModal" class="modal-overlay">
@@ -492,862 +511,430 @@
   </div>
 </div>
 
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="switchPage('manager', this)">
+    <div class="nav-icon">📊</div>
+    <span>잔여량 계산기</span>
+  </div>
+  <div class="nav-item" onclick="switchPage('calc', this)">
+    <div class="nav-icon">🧮</div>
+    <span>펩타이드 계산기</span>
+  </div>
+</div>
+
 <script>
+// [화면 전환 로직]
+function switchPage(pageName, navEl) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    navEl.classList.add('active');
+    document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+    document.getElementById(`section-${pageName}`).classList.add('active');
+    if(pageName === 'manager' && myChart) { setTimeout(() => { myChart.resize(); }, 50); }
+    window.scrollTo(0, 0);
+}
+
+// ================= [왼쪽 탭: 잔여량 계산기 로직 (원본 유지)] =================
 Chart.register(ChartDataLabels);
-
 let doses = JSON.parse(localStorage.getItem('pep_history_final_v15')) || [];
-
 const ctx = document.getElementById('myChart').getContext('2d');
 let myChart;
-let currentEditType = '';
-let viewMode = 'all'; 
-let displayType = 'chart'; 
-let deleteTargetId = null; 
-let editTargetId = null; 
-let deleteTargetIds = []; 
-
-let currentPage = 1;
-let currentHistoryPage = 1; 
+let currentEditType = '', viewMode = 'all', displayType = 'chart'; 
+let deleteTargetId = null, editTargetId = null, deleteTargetIds = []; 
+let currentPage = 1, currentHistoryPage = 1; 
 const itemsPerPage = 15; 
-
 const PK_CONFIG = {
-  tirz: { name: '터제파타이드', halfLife: 5.0, tMax: 1.0, color: '#36a2eb' },
-  reta: { name: '레타트루타이드', halfLife: 6.0, tMax: 1.5, color: '#ff6384' },
-  sema: { name: '세마글루타이드', halfLife: 7.0, tMax: 2.0, color: '#28a745' }
+  tirz: { name: '터제파타이드', halfLife: 5.0, tMax: 1.0 },
+  reta: { name: '레타트루타이드', halfLife: 6.0, tMax: 1.5 },
+  sema: { name: '세마글루타이드', halfLife: 7.0, tMax: 2.0 }
 };
-
 const DRUG_CONSTANTS = {};
 Object.keys(PK_CONFIG).forEach(k => {
     const { halfLife, tMax } = PK_CONFIG[k];
     const ke = Math.log(2) / halfLife;
-    let ka = 2.0; 
-    if (tMax >= 1.8) ka = 0.8; else if (tMax >= 1.4) ka = 1.2; else ka = 2.5;
+    let ka = (tMax >= 1.8) ? 0.8 : (tMax >= 1.4 ? 1.2 : 2.5);
     const peakTime = (Math.log(ka) - Math.log(ke)) / (ka - ke);
-    const peakVal = Math.exp(-ke * peakTime) - Math.exp(-ka * peakTime);
-    const scale = 1 / peakVal;
+    const scale = 1 / (Math.exp(-ke * peakTime) - Math.exp(-ka * peakTime));
     DRUG_CONSTANTS[k] = { ke, ka, scale };
 });
 
 window.onload = () => {
-  let needSave = false;
-  doses.forEach(d => {
-      if (!d.id) { d.id = Date.now() + Math.random(); needSave = true; }
-  });
-  if (needSave) save();
-
-  setNow();
-  initDateRange(); 
-  update();
+  doses.forEach(d => { if (!d.id) d.id = Date.now() + Math.random(); });
+  setNow(); initDateRange(); update();
+  
+  // 계산기 로직 바인딩
+  setupPillGroup('peptide', 'peptideMg');
+  setupPillGroup('water', 'waterMl', updateWaterCc);
+  setupPillGroup('dose', 'doseMcg', updateDoseMg);
 };
 
-function getTodayString() {
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-}
-
-function getNowTimeString() {
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const min = String(now.getMinutes()).padStart(2, '0');
-    return `${hh}:${min}`;
-}
-
+function getTodayString() { const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; }
+function getNowTimeString() { const n=new Date(); return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; }
 function checkDate(el) { if(!el.value) el.value = getTodayString(); }
 function checkTime(el) { if(!el.value) el.value = getNowTimeString(); }
-
-function checkRangeInput(el) {
-    if (!el.value) {
-        el.value = getTodayString();
-    }
-}
-
-function setNow() {
-    document.getElementById('inputDate').value = getTodayString();
-    document.getElementById('inputTime').value = getNowTimeString();
-}
+function checkRangeInput(el) { if (!el.value) el.value = getTodayString(); }
+function setNow() { document.getElementById('inputDate').value = getTodayString(); document.getElementById('inputTime').value = getNowTimeString(); }
 
 function setDisplayType(type) {
     displayType = type;
-    document.getElementById('btnShowGraph').classList.remove('active');
-    document.getElementById('btnShowList').classList.remove('active');
-    
-    if(type === 'chart') {
-        document.getElementById('btnShowGraph').classList.add('active');
-        document.getElementById('chartArea').style.display = 'block';
-        document.getElementById('chartTooltip').style.display = 'flex'; 
-        document.getElementById('listArea').style.display = 'none';
-    } else {
-        document.getElementById('btnShowList').classList.add('active');
-        document.getElementById('chartArea').style.display = 'none';
-        document.getElementById('chartTooltip').style.display = 'none'; 
-        document.getElementById('listArea').style.display = 'block';
-        renderDailyTable();
-    }
+    document.getElementById('btnShowGraph').classList.toggle('active', type === 'chart');
+    document.getElementById('btnShowList').classList.toggle('active', type === 'list');
+    document.getElementById('chartArea').style.display = type === 'chart' ? 'block' : 'none';
+    document.getElementById('chartTooltip').style.display = type === 'chart' ? 'flex' : 'none';
+    document.getElementById('listArea').style.display = type === 'list' ? 'block' : 'none';
+    if(type==='list') renderDailyTable();
     update();
+}
+function setViewMode(mode) {
+  viewMode = mode;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(mode==='all'?'btnAll':(mode==='tirz'?'btnTirz':(mode==='reta'?'btnReta':'btnSema'))).classList.add('active');
+  
+  const bT = document.getElementById('btnTirz'); const bR = document.getElementById('btnReta'); const bS = document.getElementById('btnSema');
+  if(mode==='tirz'){ bT.style.background='#36a2eb'; bT.style.color='white'; } else { bT.style.background='#f8f9fa'; bT.style.color='#36a2eb'; }
+  if(mode==='reta'){ bR.style.background='#ff6384'; bR.style.color='white'; } else { bR.style.background='#f8f9fa'; bR.style.color='#ff6384'; }
+  if(mode==='sema'){ bS.style.background='#28a745'; bS.style.color='white'; } else { bS.style.background='#f8f9fa'; bS.style.color='#28a745'; }
+
+  currentHistoryPage = 1; update(); 
 }
 
 function add() {
   const type = document.getElementById('drugType').value;
   const amt = parseFloat(document.getElementById('doseAmt').value);
-  
-  let dDate = document.getElementById('inputDate').value;
-  let dTime = document.getElementById('inputTime').value;
+  const time = new Date(`${document.getElementById('inputDate').value}T${document.getElementById('inputTime').value}`).getTime();
+  if (!amt || isNaN(time)) return alert("용량을 입력해주세요.");
+  doses.push({ id: Date.now()+Math.random(), type, amt, time, manual: false });
+  sortDoses(); save(); update(); setNow();
+  currentHistoryPage = 1;
+}
+function sortDoses() { doses.sort((a,b) => (a.time !== b.time) ? a.time - b.time : (a.manual && !b.manual ? -1 : (!a.manual && b.manual ? 1 : 0))); }
+function save() { localStorage.setItem('pep_history_final_v15', JSON.stringify(doses)); }
 
-  if(!dDate) { dDate = getTodayString(); document.getElementById('inputDate').value = dDate; }
-  if(!dTime) { dTime = getNowTimeString(); document.getElementById('inputTime').value = dTime; }
-  
-  if (!amt) return alert("용량을 입력해주세요.");
-  
-  const dateTimeStr = `${dDate}T${dTime}`;
-  const timestamp = new Date(dateTimeStr).getTime();
-  
-  if (isNaN(timestamp)) return alert("날짜 형식이 올바르지 않습니다.");
-
-  doses.push({ id: Date.now() + Math.random(), type: type, amt: amt, time: timestamp, manual: false });
-  sortDoses(); 
-  currentHistoryPage = 1; 
-  save(); update();
-  setNow(); 
+function calculateConcentration(dose, days, type) {
+  if (days < 0) return 0;
+  const { ke, ka, scale } = DRUG_CONSTANTS[type];
+  const val = dose * scale * (Math.exp(-ke * days) - Math.exp(-ka * days));
+  return val > 0 ? val : 0;
+}
+function calculateTotalLevel(target, type) {
+  let total = 0;
+  const history = doses.filter(d => d.type === type).sort((a,b) => a.time - b.time);
+  let startIdx = -1;
+  history.forEach((h, i) => { if(h.manual && h.time <= target) startIdx = i; });
+  if (startIdx !== -1) {
+      const ov = history[startIdx];
+      total = ov.amt * Math.pow(0.5, (target - ov.time) / 86400000 / PK_CONFIG[type].halfLife);
+  }
+  for (let i = startIdx + 1; i < history.length; i++) {
+      if (history[i].time > target) break;
+      if (!history[i].manual) total += calculateConcentration(history[i].amt, (target - history[i].time)/86400000, type);
+  }
+  return total;
 }
 
-function sortDoses() {
-  doses.sort((a, b) => {
-    if (a.time !== b.time) return a.time - b.time;
-    if (a.manual && !b.manual) return -1;
-    if (!a.manual && b.manual) return 1;
-    return 0;
-  });
+function update() {
+  const now = Date.now();
+  document.getElementById('valTirz').innerText = calculateTotalLevel(now, 'tirz').toFixed(2);
+  document.getElementById('valReta').innerText = calculateTotalLevel(now, 'reta').toFixed(2);
+  document.getElementById('valSema').innerText = calculateTotalLevel(now, 'sema').toFixed(2);
+  if(displayType === 'chart') drawChart();
+  renderHistoryList(); renderDailyTable();
 }
 
-function setViewMode(mode) {
-  viewMode = mode;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  
-  if(mode === 'all') document.getElementById('btnAll').classList.add('active');
-  const btnTirz = document.getElementById('btnTirz');
-  const btnReta = document.getElementById('btnReta');
-  const btnSema = document.getElementById('btnSema');
-
-  if(mode === 'tirz') { btnTirz.classList.add('active'); btnTirz.style.background='#36a2eb'; btnTirz.style.color='white'; }
-  else { btnTirz.style.background='#f8f9fa'; btnTirz.style.color='#36a2eb'; }
-  
-  if(mode === 'reta') { btnReta.classList.add('active'); btnReta.style.background='#ff6384'; btnReta.style.color='white'; }
-  else { btnReta.style.background='#f8f9fa'; btnReta.style.color='#ff6384'; }
-
-  if(mode === 'sema') { btnSema.classList.add('active'); btnSema.style.background='#28a745'; btnSema.style.color='white'; }
-  else { btnSema.style.background='#f8f9fa'; btnSema.style.color='#28a745'; }
-
-  currentHistoryPage = 1; 
-  update(); 
+function initDateRange() {
+    const s = new Date(Date.now() - 5*86400000);
+    const e = new Date(Date.now() + 45*86400000);
+    if(doses.length>0 && doses[0].time < s.getTime()) s.setTime(doses[0].time);
+    document.getElementById('searchStart').value = s.toISOString().split('T')[0];
+    document.getElementById('searchEnd').value = e.toISOString().split('T')[0];
 }
+function setFullRange() {
+    let target = doses;
+    if(viewMode!=='all') target = doses.filter(d=>d.type===viewMode);
+    if(!target.length) { initDateRange(); searchUpdate(); return; }
+    const ts = target.map(d=>d.time);
+    document.getElementById('searchStart').value = new Date(Math.min(...ts)).toISOString().split('T')[0];
+    document.getElementById('searchEnd').value = new Date(Math.max(...ts)+45*86400000).toISOString().split('T')[0];
+    searchUpdate();
+}
+function searchUpdate() { currentPage = 1; update(); }
 
 function openEditModal(type) {
   currentEditType = type;
-  const name = PK_CONFIG[type].name;
-  const val = calculateTotalLevel(new Date().getTime(), type).toFixed(2);
-  
-  document.getElementById('editModalTitle').innerText = `${name} 수정`;
-  document.getElementById('editInput').value = val;
+  document.getElementById('editModalTitle').innerText = `${PK_CONFIG[type].name} 수정`;
+  document.getElementById('editInput').value = calculateTotalLevel(Date.now(), type).toFixed(2);
   document.getElementById('editModal').style.display = 'flex';
   document.getElementById('editInput').focus();
 }
 function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
-
 function saveManualValue() {
   const val = parseFloat(document.getElementById('editInput').value);
   if (isNaN(val)) return alert("숫자만 입력하세요.");
-  
-  const now = new Date();
-  const timestamp = now.getTime();
-
-  doses.push({ id: Date.now() + Math.random(), type: currentEditType, amt: val, time: timestamp, manual: true });
-  
-  sortDoses(); 
-  currentHistoryPage = 1; 
-  save(); update(); closeEditModal();
-}
-
-function openRecordEditModal(id) {
-  editTargetId = id;
-  const record = doses.find(d => d.id === id);
-  if (!record) return;
-  
-  const typeSelect = document.getElementById('editRecordType');
-  if(typeSelect) typeSelect.value = record.type;
-
-  document.getElementById('editRecordAmt').value = record.amt;
-  
-  const d = new Date(record.time);
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  const hh = String(d.getHours()).padStart(2, '0');
-  const min = String(d.getMinutes()).padStart(2, '0');
-  
-  document.getElementById('editRecordDate').value = `${yyyy}-${mm}-${dd}`;
-  document.getElementById('editRecordTime').value = `${hh}:${min}`;
-  
-  document.getElementById('recordEditModal').style.display = 'flex';
-}
-
-function closeRecordEditModal() {
-  document.getElementById('recordEditModal').style.display = 'none';
-  editTargetId = null;
-}
-
-function saveRecordEdit() {
-  if (editTargetId === null) return;
-  
-  const targetIndex = doses.findIndex(d => d.id === editTargetId);
-  if (targetIndex === -1) return;
-
-  const newType = document.getElementById('editRecordType').value; 
-  const amt = parseFloat(document.getElementById('editRecordAmt').value);
-  let dDate = document.getElementById('editRecordDate').value;
-  let dTime = document.getElementById('editRecordTime').value;
-  
-  if(!dDate) dDate = getTodayString();
-  if(!dTime) dTime = getNowTimeString();
-  
-  if (isNaN(amt)) return alert("값을 확인해주세요.");
-  
-  const timestamp = new Date(`${dDate}T${dTime}`).getTime();
-  
-  doses[targetIndex].type = newType;
-  doses[targetIndex].amt = amt;
-  doses[targetIndex].time = timestamp;
-  
-  sortDoses(); 
-  save(); update(); closeRecordEditModal();
-}
-
-function openResetModal() { 
-    document.getElementById('checkTirz').checked = false;
-    document.getElementById('checkReta').checked = false;
-    document.getElementById('checkSema').checked = false;
-    document.getElementById('resetError').style.display = 'none';
-    document.getElementById('resetModal').style.display = 'flex'; 
-}
-function closeResetModal() { document.getElementById('resetModal').style.display = 'none'; }
-function confirmReset() { 
-    const delTirz = document.getElementById('checkTirz').checked;
-    const delReta = document.getElementById('checkReta').checked;
-    const delSema = document.getElementById('checkSema').checked;
-
-    if(!delTirz && !delReta && !delSema) { document.getElementById('resetError').style.display = 'block'; return; }
-    
-    if(delTirz) doses = doses.filter(d => d.type !== 'tirz');
-    if(delReta) doses = doses.filter(d => d.type !== 'reta');
-    if(delSema) doses = doses.filter(d => d.type !== 'sema');
-    
-    currentHistoryPage = 1; 
-    save(); update(); closeResetModal(); 
-}
-
-function save() { localStorage.setItem('pep_history_final_v15', JSON.stringify(doses)); }
-
-function calculateConcentration(dose, daysElapsed, type) {
-  if (daysElapsed < 0) return 0;
-  const { ke, ka, scale } = DRUG_CONSTANTS[type];
-  const val = dose * scale * (Math.exp(-ke * daysElapsed) - Math.exp(-ka * daysElapsed));
-  return val > 0 ? val : 0;
-}
-
-function calculateTotalLevel(targetTime, drugType) {
-  let total = 0;
-  const history = doses.filter(d => d.type === drugType).sort((a,b) => a.time - b.time);
-
-  if (history.length === 0) return 0;
-
-  let startIndex = -1;
-  for(let i = 0; i < history.length; i++) {
-    if(history[i].manual && history[i].time <= targetTime) {
-      startIndex = i;
-    }
-  }
-
-  if (startIndex !== -1) {
-      const overrideEvent = history[startIndex];
-      const diffDays = (targetTime - overrideEvent.time) / 86400000;
-      const { halfLife } = PK_CONFIG[drugType];
-      total = overrideEvent.amt * Math.pow(0.5, diffDays / halfLife);
-  }
-
-  for (let i = startIndex + 1; i < history.length; i++) {
-      const event = history[i];
-      if (event.time > targetTime) break; 
-      
-      if (!event.manual) {
-          const diffDays = (targetTime - event.time) / 86400000;
-          total += calculateConcentration(event.amt, diffDays, drugType);
-      }
-  }
-
-  return total;
-}
-
-function initDateRange() {
-    const now = new Date();
-    let startTs = now.getTime() - (5 * 86400000); 
-    if (doses.length > 0) startTs = doses[0].time;
-    const endTs = now.getTime() + (45 * 86400000); 
-
-    const sDate = new Date(startTs);
-    const sYear = sDate.getFullYear();
-    const sMonth = String(sDate.getMonth() + 1).padStart(2, '0');
-    const sDay = String(sDate.getDate()).padStart(2, '0');
-    document.getElementById('searchStart').value = `${sYear}-${sMonth}-${sDay}`;
-
-    const eDate = new Date(endTs);
-    const eYear = eDate.getFullYear();
-    const eMonth = String(eDate.getMonth() + 1).padStart(2, '0');
-    const eDay = String(eDate.getDate()).padStart(2, '0');
-    document.getElementById('searchEnd').value = `${eYear}-${eMonth}-${eDay}`;
-}
-
-function setFullRange() {
-    let targetDoses = doses;
-    if (viewMode !== 'all') {
-        targetDoses = doses.filter(d => d.type === viewMode);
-    }
-
-    if (targetDoses.length === 0) {
-        initDateRange();
-        searchUpdate();
-        return;
-    }
-
-    const times = targetDoses.map(d => d.time);
-    const minTime = Math.min(...times);
-    const maxTime = Math.max(...times);
-
-    const startDate = new Date(minTime);
-    const endTime = new Date(maxTime + (45 * 86400000));
-
-    const sYear = startDate.getFullYear();
-    const sMonth = String(startDate.getMonth() + 1).padStart(2, '0');
-    const sDay = String(startDate.getDate()).padStart(2, '0');
-    document.getElementById('searchStart').value = `${sYear}-${sMonth}-${sDay}`;
-
-    const eYear = endTime.getFullYear();
-    const eMonth = String(endTime.getMonth() + 1).padStart(2, '0');
-    const eDay = String(endTime.getDate()).padStart(2, '0');
-    document.getElementById('searchEnd').value = `${eYear}-${eMonth}-${eDay}`;
-
-    searchUpdate();
-}
-
-function searchUpdate() {
-    currentPage = 1;
-    update();
-}
-
-function update() {
-  const now = new Date().getTime();
-  document.getElementById('valTirz').innerText = calculateTotalLevel(now, 'tirz').toFixed(2);
-  document.getElementById('valReta').innerText = calculateTotalLevel(now, 'reta').toFixed(2);
-  document.getElementById('valSema').innerText = calculateTotalLevel(now, 'sema').toFixed(2);
-
-  if(displayType === 'chart') {
-      drawChart();
-  }
-
-  renderHistoryList(); 
-  renderDailyTable();
-}
-
-function toggleSelectAll() {
-    const checkboxes = document.querySelectorAll('.history-chk');
-    if (checkboxes.length === 0) return;
-    
-    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-    
-    checkboxes.forEach(cb => {
-        cb.checked = !allChecked;
-    });
-}
-
-function changeHistoryFilter() {
-    currentHistoryPage = 1;
-    renderHistoryList();
+  doses.push({ id: Date.now()+Math.random(), type: currentEditType, amt: val, time: Date.now(), manual: true });
+  sortDoses(); save(); update(); closeEditModal();
+  currentHistoryPage=1;
 }
 
 function renderHistoryList() {
-    const historyListEl = document.getElementById('historyList');
-    historyListEl.innerHTML = '';
+    const el = document.getElementById('historyList'); el.innerHTML = '';
+    const f = document.getElementById('historyFilter').value;
+    const list = doses.filter(d => f === 'all' || d.type === f).reverse();
+    const pageList = list.slice((currentHistoryPage-1)*itemsPerPage, currentHistoryPage*itemsPerPage);
     
-    // 상단 탭이 아닌, 하단 전용 필터를 사용하도록 수정
-    const filterVal = document.getElementById('historyFilter').value;
-
-    const filteredDoses = doses.filter(d => filterVal === 'all' || d.type === filterVal);
-    const reversedDoses = [...filteredDoses].reverse();
-
-    const totalItems = reversedDoses.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    if (currentHistoryPage > totalPages) currentHistoryPage = 1;
-    if (currentHistoryPage < 1) currentHistoryPage = 1;
-
-    const startIdx = (currentHistoryPage - 1) * itemsPerPage;
-    const endIdx = startIdx + itemsPerPage;
-    const pageItems = reversedDoses.slice(startIdx, endIdx);
-
-    pageItems.forEach((d) => {
-        const dObj = new Date(d.time);
-        const year = dObj.getFullYear();
-        const month = dObj.getMonth() + 1;
-        const day = dObj.getDate();
-        const dayName = getDayName(dObj.getDay());
-        let hour = dObj.getHours();
-        const min = String(dObj.getMinutes()).padStart(2, '0');
-        const ampm = hour >= 12 ? '오후' : '오전';
-        hour = hour % 12;
-        hour = hour ? hour : 12; 
-        
-        // (요일)을 추가하고, 오전/오후 시간을 span으로 묶어 줄바꿈 방지
-        const dateStr = `${year}. ${month}. ${day}. (${dayName}) <span style="white-space:nowrap">${ampm} ${hour}:${min}</span>`;
-        
-        let label = '터제'; let tagClass = 'tirz';
-        if(d.type === 'reta') { label = '레타'; tagClass = 'reta'; }
-        if(d.type === 'sema') { label = '세마'; tagClass = 'sema'; }
-
-        const manualTag = d.manual ? '<span class="manual-tag">[강제설정]</span>' : '';
-        
-        historyListEl.innerHTML += `
-          <div class="list-item">
-            <div style="display:flex; align-items:center; margin-right:10px;">
-                <input type="checkbox" class="history-chk" value="${d.id}">
-            </div>
-            <div style="flex-grow:1;">
-              <span class="tag ${tagClass}">${label}</span>
-              <strong>${d.amt} mg</strong> ${manualTag}
-              <div style="color:#888; font-size:0.85em; margin-top:4px;">${dateStr}</div>
-            </div>
-            <div class="action-group">
-                <button class="list-btn" onclick="openRecordEditModal(${d.id})" style="color:#36a2eb;">✎</button>
-                <button class="list-btn" onclick="askDel(${d.id})" style="color:#aaa;">✕</button>
-            </div>
-          </div>`;
+    pageList.forEach(d => {
+        const date = new Date(d.time);
+        const dateStr = `${date.getFullYear()}. ${date.getMonth()+1}. ${date.getDate()}. (${['일','월','화','수','목','금','토'][date.getDay()]}) <span style="white-space:nowrap">${date.getHours()>=12?'오후':'오전'} ${date.getHours()%12||12}:${String(date.getMinutes()).padStart(2,'0')}</span>`;
+        const color = d.type === 'tirz' ? 'tirz' : (d.type === 'reta' ? 'reta' : 'sema');
+        const name = d.type === 'tirz' ? '터제' : (d.type === 'reta' ? '레타' : '세마');
+        el.innerHTML += `<div class="list-item">
+            <div style="display:flex; align-items:center; margin-right:10px;"><input type="checkbox" class="history-chk" value="${d.id}"></div>
+            <div style="flex-grow:1;"><span class="tag ${color}">${name}</span> <strong>${d.amt} mg</strong> ${d.manual?'<span class="manual-tag">[강제설정]</span>':''}
+            <div style="color:#888; font-size:0.85em; margin-top:4px;">${dateStr}</div></div>
+            <div class="action-group"><button class="list-btn" onclick="openRecordEditModal(${d.id})" style="color:#36a2eb;">✎</button>
+            <button class="list-btn" onclick="askDel(${d.id})" style="color:#aaa;">✕</button></div></div>`;
     });
-
-    renderHistoryPagination(totalPages);
+    renderPagination('historyPaginationControls', Math.ceil(list.length/itemsPerPage), currentHistoryPage, (p)=>{currentHistoryPage=p; renderHistoryList();});
 }
-
-function renderHistoryPagination(totalPages) {
-    const container = document.getElementById('historyPaginationControls');
-    container.innerHTML = '';
-    
-    if (totalPages <= 1) return;
-
-    const prevBtn = document.createElement('button');
-    prevBtn.className = 'page-btn';
-    prevBtn.innerHTML = '‹';
-    prevBtn.disabled = currentHistoryPage === 1;
-    prevBtn.onclick = () => changeHistoryPage(currentHistoryPage - 1);
-    container.appendChild(prevBtn);
-
-    let startPage = Math.max(1, currentHistoryPage - 2);
-    let endPage = Math.min(totalPages, currentHistoryPage + 2);
-    
-    if (endPage - startPage < 4) {
-        if (startPage === 1) endPage = Math.min(totalPages, startPage + 4);
-        else if (endPage === totalPages) startPage = Math.max(1, endPage - 4);
+function renderPagination(id, total, curr, cb) {
+    const c = document.getElementById(id); c.innerHTML = '';
+    if(total <= 1) return;
+    const mkBtn = (txt, dis, clk) => {
+        const b = document.createElement('button'); b.className = 'page-btn'; b.innerHTML = txt;
+        if(dis) b.disabled=true; else b.onclick=clk; c.appendChild(b);
+    };
+    mkBtn('‹', curr===1, ()=>cb(curr-1));
+    let s=Math.max(1,curr-2), e=Math.min(total,curr+2);
+    if(e-s<4) { if(s===1) e=Math.min(total,s+4); else s=Math.max(1,e-4); }
+    for(let i=s; i<=e; i++) {
+        const b=document.createElement('button'); b.className=`page-btn ${i===curr?'active':''}`; b.innerText=i; b.onclick=()=>cb(i); c.appendChild(b);
     }
-
-    for (let i = startPage; i <= endPage; i++) {
-        const btn = document.createElement('button');
-        btn.className = `page-btn ${i === currentHistoryPage ? 'active' : ''}`;
-        btn.innerText = i;
-        btn.onclick = () => changeHistoryPage(i);
-        container.appendChild(btn);
-    }
-
-    const nextBtn = document.createElement('button');
-    nextBtn.className = 'page-btn';
-    nextBtn.innerHTML = '›';
-    nextBtn.disabled = currentHistoryPage === totalPages;
-    nextBtn.onclick = () => changeHistoryPage(currentHistoryPage + 1);
-    container.appendChild(nextBtn);
+    mkBtn('›', curr===total, ()=>cb(curr+1));
 }
-
-function changeHistoryPage(page) {
-    currentHistoryPage = page;
-    renderHistoryList(); 
-}
-
-function askDel(id) {
-    deleteTargetId = id;
-    deleteTargetIds = []; 
+function changeHistoryFilter() { currentHistoryPage = 1; renderHistoryList(); }
+function toggleSelectAll() { const c = document.querySelectorAll('.history-chk'); const all = Array.from(c).every(x=>x.checked); c.forEach(x=>x.checked=!all); }
+function askDel(id) { deleteTargetId = id; deleteTargetIds = []; document.getElementById('singleDelModal').style.display = 'flex'; }
+function askMultiDel() { 
+    const c = document.querySelectorAll('.history-chk:checked');
+    if(!c.length) return alert("삭제할 항목을 선택해주세요.");
+    deleteTargetId = null; deleteTargetIds = Array.from(c).map(x=>parseFloat(x.value));
     document.getElementById('singleDelModal').style.display = 'flex';
 }
-
-function askMultiDel() {
-    const checkboxes = document.querySelectorAll('.history-chk:checked');
-    if (checkboxes.length === 0) {
-        alert("삭제할 항목을 선택해주세요.");
-        return;
-    }
-    deleteTargetId = null;
-    deleteTargetIds = Array.from(checkboxes).map(cb => parseFloat(cb.value));
-    document.getElementById('singleDelModal').style.display = 'flex';
-}
-
-function closeSingleDelModal() {
-    document.getElementById('singleDelModal').style.display = 'none';
-    deleteTargetId = null;
-    deleteTargetIds = [];
-}
-
+function closeSingleDelModal() { document.getElementById('singleDelModal').style.display = 'none'; deleteTargetId=null; deleteTargetIds=[];}
 function confirmSingleDel() {
-    if (deleteTargetId !== null) {
-        const idx = doses.findIndex(d => d.id === deleteTargetId);
-        if (idx !== -1) {
-            doses.splice(idx, 1);
-        }
-    } else if (deleteTargetIds.length > 0) {
-        doses = doses.filter(d => !deleteTargetIds.includes(d.id));
+    if(deleteTargetId !== null) { const i = doses.findIndex(d=>d.id===deleteTargetId); if(i!==-1) doses.splice(i,1); }
+    else if(deleteTargetIds.length) doses = doses.filter(d=>!deleteTargetIds.includes(d.id));
+    save(); update(); closeSingleDelModal();
+}
+function openRecordEditModal(id) {
+    editTargetId = id; const d = doses.find(x=>x.id===id); if(!d) return;
+    document.getElementById('editRecordType').value = d.type;
+    document.getElementById('editRecordAmt').value = d.amt;
+    const dt = new Date(d.time);
+    document.getElementById('editRecordDate').value = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+    document.getElementById('editRecordTime').value = `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+    document.getElementById('recordEditModal').style.display = 'flex';
+}
+function closeRecordEditModal() { document.getElementById('recordEditModal').style.display = 'none'; editTargetId=null; }
+function saveRecordEdit() {
+    if(editTargetId===null) return;
+    const i = doses.findIndex(x=>x.id===editTargetId);
+    if(i>-1) {
+        const newType = document.getElementById('editRecordType').value;
+        const amt = parseFloat(document.getElementById('editRecordAmt').value);
+        let dDate = document.getElementById('editRecordDate').value, dTime = document.getElementById('editRecordTime').value;
+        if(!dDate) dDate = getTodayString(); if(!dTime) dTime = getNowTimeString();
+        if(isNaN(amt)) return alert("값을 확인해주세요.");
+        doses[i].type = newType; doses[i].amt = amt; doses[i].time = new Date(`${dDate}T${dTime}`).getTime();
+        sortDoses(); save(); update(); closeRecordEditModal();
     }
-    
-    save();
-    update();
-    closeSingleDelModal();
+}
+function openResetModal() { 
+    document.getElementById('checkTirz').checked = false; document.getElementById('checkReta').checked = false; document.getElementById('checkSema').checked = false;
+    document.getElementById('resetError').style.display = 'none'; document.getElementById('resetModal').style.display = 'flex';
+}
+function closeResetModal() { document.getElementById('resetModal').style.display = 'none'; }
+function confirmReset() {
+    const t = document.getElementById('checkTirz').checked, r = document.getElementById('checkReta').checked, s = document.getElementById('checkSema').checked;
+    if(!t && !r && !s) { document.getElementById('resetError').style.display = 'block'; return; }
+    if(t) doses = doses.filter(d=>d.type!=='tirz'); if(r) doses = doses.filter(d=>d.type!=='reta'); if(s) doses = doses.filter(d=>d.type!=='sema');
+    currentHistoryPage=1; save(); update(); closeResetModal();
 }
 
 function drawChart() {
-  const now = new Date();
-  const todayStr = now.toDateString();
-  const nowTs = now.getTime();
+    const sStr = document.getElementById('searchStart').value;
+    const eStr = document.getElementById('searchEnd').value;
+    const nowTs = new Date().getTime();
+    let s = sStr ? new Date(sStr).getTime() : nowTs - 5*86400000;
+    let e = eStr ? new Date(eStr).getTime() : nowTs + 45*86400000;
+    if(!sStr && doses.length) s = doses[0].time;
 
-  const labels = [];
-  const fullDates = []; 
+    const labels = [], dt = [], dr = [], ds = [];
+    const prT=[], pbT=[], prR=[], pbR=[], prS=[], pbS=[], lT=[], lR=[], lS=[];
+    const todayStr = new Date().toDateString();
 
-  const dataTirz = [], dataReta = [], dataSema = [];
-  const pointRadiusTirz = [], pointBgTirz = [];
-  const pointRadiusReta = [], pointBgReta = [];
-  const pointRadiusSema = [], pointBgSema = [];
-  
-  const labelsTirz = [], labelsReta = [], labelsSema = [];
-  
-  const sVal = document.getElementById('searchStart').value;
-  const eVal = document.getElementById('searchEnd').value;
-  
-  let startTime = sVal ? new Date(sVal).getTime() : nowTs - (5 * 86400000);
-  let endTime = eVal ? new Date(eVal).getTime() : nowTs + (45 * 86400000);
-  
-  if(!sVal && doses.length > 0) startTime = doses[0].time;
-
-  for (let t = startTime; t <= endTime; t += 86400000) {
-    const d = new Date(t);
-    labels.push(`${d.getMonth()+1}.${d.getDate()}`); 
-    fullDates.push(`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`);
-
-    dataTirz.push(calculateTotalLevel(t, 'tirz'));
-    dataReta.push(calculateTotalLevel(t, 'reta'));
-    dataSema.push(calculateTotalLevel(t, 'sema'));
-
-    const doseT = doses.find(dd => dd.type === 'tirz' && new Date(dd.time).toDateString() === d.toDateString());
-    const doseR = doses.find(dd => dd.type === 'reta' && new Date(dd.time).toDateString() === d.toDateString());
-    const doseS = doses.find(dd => dd.type === 'sema' && new Date(dd.time).toDateString() === d.toDateString());
-    const isToday = d.toDateString() === todayStr;
-
-    if (doseT) { pointRadiusTirz.push(6); pointBgTirz.push('#36a2eb'); labelsTirz.push(doseT.amt + 'mg'); } 
-    else if (isToday) { pointRadiusTirz.push(8); pointBgTirz.push('#36a2eb'); labelsTirz.push(null); } 
-    else { pointRadiusTirz.push(0); pointBgTirz.push('transparent'); labelsTirz.push(null); }
-
-    if (doseR) { pointRadiusReta.push(6); pointBgReta.push('#ff6384'); labelsReta.push(doseR.amt + 'mg'); } 
-    else if (isToday) { pointRadiusReta.push(8); pointBgReta.push('#ff6384'); labelsReta.push(null); } 
-    else { pointRadiusReta.push(0); pointBgReta.push('transparent'); labelsReta.push(null); }
-
-    if (doseS) { pointRadiusSema.push(6); pointBgSema.push('#28a745'); labelsSema.push(doseS.amt + 'mg'); } 
-    else if (isToday) { pointRadiusSema.push(8); pointBgSema.push('#28a745'); labelsSema.push(null); } 
-    else { pointRadiusSema.push(0); pointBgSema.push('transparent'); labelsSema.push(null); }
-  }
-
-  const hoverRadius = 6;
-  const hoverBorderColor = '#fff';
-
-  const datalabelOptions = {
-      align: 'top',
-      anchor: 'end',
-      font: { size: 10, weight: 'bold' },
-      formatter: (value, context) => {
-          const labelArr = context.dataset.labelArray; 
-          return labelArr ? labelArr[context.dataIndex] : null;
-      }
-  };
-
-  const tooltipOpacity = 0.8;
-  const tooltipBgColor = `rgba(0,0,0,${tooltipOpacity})`;
-
-  let datasets = [];
-  
-  const datasetTirz = {
-    label: '터제파타이드', data: dataTirz, borderColor: '#36a2eb', backgroundColor: 'rgba(54, 162, 235, 0.1)', 
-    borderWidth: 2, tension: 0.4, fill: true, 
-    pointRadius: pointRadiusTirz, pointBackgroundColor: pointBgTirz, pointBorderColor: '#fff', pointBorderWidth: 2, 
-    pointHitRadius: 15,
-    pointHoverRadius: hoverRadius, pointHoverBackgroundColor: '#36a2eb', pointHoverBorderColor: hoverBorderColor,
-    labelArray: labelsTirz,
-    datalabels: { ...datalabelOptions, color: '#36a2eb' }
-  };
-  const datasetReta = {
-    label: '레타트루타이드', data: dataReta, borderColor: '#ff6384', backgroundColor: 'rgba(255, 99, 132, 0.1)', 
-    borderWidth: 2, tension: 0.4, fill: true, 
-    pointRadius: pointRadiusReta, pointBackgroundColor: pointBgReta, pointBorderColor: '#fff', pointBorderWidth: 2, 
-    pointHitRadius: 15,
-    pointHoverRadius: hoverRadius, pointHoverBackgroundColor: '#ff6384', pointHoverBorderColor: hoverBorderColor,
-    labelArray: labelsReta,
-    datalabels: { ...datalabelOptions, color: '#ff6384' }
-  };
-  const datasetSema = {
-    label: '세마글루타이드', data: dataSema, borderColor: '#28a745', backgroundColor: 'rgba(40, 167, 69, 0.1)', 
-    borderWidth: 2, tension: 0.4, fill: true, 
-    pointRadius: pointRadiusSema, pointBackgroundColor: pointBgSema, pointBorderColor: '#fff', pointBorderWidth: 2, 
-    pointHitRadius: 15,
-    pointHoverRadius: hoverRadius, pointHoverBackgroundColor: '#28a745', pointHoverBorderColor: hoverBorderColor,
-    labelArray: labelsSema,
-    datalabels: { ...datalabelOptions, color: '#28a745' }
-  };
-
-  if (viewMode === 'all') { datasets.push(datasetTirz); datasets.push(datasetReta); datasets.push(datasetSema); }
-  else if (viewMode === 'tirz') { datasets.push(datasetTirz); }
-  else if (viewMode === 'reta') { datasets.push(datasetReta); }
-  else if (viewMode === 'sema') { datasets.push(datasetSema); }
-
-  if (myChart) myChart.destroy();
-  
-  myChart = new Chart(ctx, {
-    type: 'line',
-    data: { labels: labels, datasets: datasets },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      events: ['mousemove', 'mouseout', 'touchstart', 'touchmove'], 
-      interaction: { mode: 'index', intersect: false },
-      scales: { 
-          x: { ticks: { autoSkip: true, maxTicksLimit: 6 } }, 
-          y: { 
-              beginAtZero: true, 
-              title: { display: false }, 
-              ticks: { padding: 10 } 
-          } 
-      },
-      layout: { padding: { left: 10, right: 25, top: 25, bottom: 10 } },
-      plugins: {
-        legend: { display: false },
-        datalabels: { display: true },
-        tooltip: {
-          enabled: false, 
-          callbacks: { 
-              title: function(context) {
-                  return fullDates[context[0].dataIndex];
-              }
-          },
-          external: function(context) { 
-              let tooltipEl = document.getElementById('chartTooltip');
-              const tooltipModel = context.tooltip;
-              
-              if (tooltipModel.opacity === 0) {
-                  return; 
-              }
-
-              if (tooltipModel.body) {
-                  const titleLines = tooltipModel.title || [];
-                  const bodyLines = tooltipModel.body.map(b => b.lines);
-
-                  const dateStr = titleLines[0]; 
-                  
-                  // 오늘 날짜인지 확인하는 로직 추가
-                  const nowObj = new Date();
-                  const todayFormatted = `${nowObj.getFullYear()}. ${nowObj.getMonth()+1}. ${nowObj.getDate()}.`;
-                  
-                  let dateDisplay = dateStr;
-                  if(dateStr === todayFormatted) {
-                      dateDisplay += ' (오늘)';
-                  }
-
-                  let doseInfoHtml = '';
-                  doses.forEach(dose => {
-                      const d = new Date(dose.time);
-                      const dStr = `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`;
-                      if (dStr === dateStr) {
-                          let name = '';
-                          if (dose.type === 'tirz') name = '터제';
-                          else if (dose.type === 'reta') name = '레타';
-                          else if (dose.type === 'sema') name = '세마';
-                          
-                          doseInfoHtml += `<span class="tooltip-dose-badge">💉 ${name} ${dose.amt}mg</span>`;
-                      }
-                  });
-
-                  let innerHtml = '<div class="tooltip-date">' + dateDisplay + '</div>';
-                  if(doseInfoHtml) {
-                       innerHtml += '<div class="tooltip-doses">' + doseInfoHtml + '</div>';
-                  }
-
-                  innerHtml += '<div class="tooltip-body">';
-                  
-                  bodyLines.forEach((body, i) => {
-                      const dataIndex = tooltipModel.dataPoints[i].datasetIndex;
-                      const dataset = context.chart.data.datasets[dataIndex];
-                      const color = dataset.borderColor;
-                      const style = 'background:' + color + ';';
-                      const span = '<span class="color-square" style="' + style + '"></span>';
-                      innerHtml += '<div class="tooltip-item">' + span + body + '</div>';
-                  });
-                  innerHtml += '</div>';
-
-                  tooltipEl.innerHTML = innerHtml;
-              }
-          }
-        }
-      }
+    for(let t=s; t<=e; t+=86400000) {
+        const d = new Date(t);
+        labels.push(`${d.getMonth()+1}.${d.getDate()}`);
+        dt.push(calculateTotalLevel(t,'tirz')); dr.push(calculateTotalLevel(t,'reta')); ds.push(calculateTotalLevel(t,'sema'));
+        
+        const isT = d.toDateString()===todayStr;
+        const findDose = (type) => doses.find(x => x.type===type && new Date(x.time).toDateString()===d.toDateString());
+        const doT = findDose('tirz'), doR = findDose('reta'), doS = findDose('sema');
+        
+        if(doT) { prT.push(6); pbT.push('#36a2eb'); lT.push(doT.amt+'mg'); } else if(isT) { prT.push(8); pbT.push('#36a2eb'); lT.push(null); } else { prT.push(0); pbT.push('transparent'); lT.push(null); }
+        if(doR) { prR.push(6); pbR.push('#ff6384'); lR.push(doR.amt+'mg'); } else if(isT) { prR.push(8); pbR.push('#ff6384'); lR.push(null); } else { prR.push(0); pbR.push('transparent'); lR.push(null); }
+        if(doS) { prS.push(6); pbS.push('#28a745'); lS.push(doS.amt+'mg'); } else if(isT) { prS.push(8); pbS.push('#28a745'); lS.push(null); } else { prS.push(0); pbS.push('transparent'); lS.push(null); }
     }
-  });
-  
-  const canvas = document.getElementById('myChart');
-  const hideTooltip = () => {
-       myChart.tooltip.setActiveElements([], {x: 0, y: 0}); 
-       myChart.setActiveElements([]); 
-       myChart.update();
-  };
-  canvas.addEventListener('touchend', hideTooltip);
-  canvas.addEventListener('touchcancel', hideTooltip);
-  canvas.addEventListener('mouseleave', hideTooltip);
-  canvas.addEventListener('click', hideTooltip); 
+    
+    if(myChart) myChart.destroy();
+    
+    const datasets = [];
+    if(viewMode==='all'||viewMode==='tirz') datasets.push({label:'터제', data:dt, borderColor:'#36a2eb', backgroundColor:'rgba(54,162,235,0.1)', borderWidth:2, tension:0.4, fill:true, pointRadius:prT, pointBackgroundColor:pbT, pointBorderColor:'#fff', pointHoverRadius:6, pointHoverBackgroundColor:'#36a2eb', labelArray:lT, datalabels:{align:'top',anchor:'end',font:{size:10,weight:'bold'},color:'#36a2eb',formatter:(v,c)=>c.dataset.labelArray[c.dataIndex]}});
+    if(viewMode==='all'||viewMode==='reta') datasets.push({label:'레타', data:dr, borderColor:'#ff6384', backgroundColor:'rgba(255,99,132,0.1)', borderWidth:2, tension:0.4, fill:true, pointRadius:prR, pointBackgroundColor:pbR, pointBorderColor:'#fff', pointHoverRadius:6, pointHoverBackgroundColor:'#ff6384', labelArray:lR, datalabels:{align:'top',anchor:'end',font:{size:10,weight:'bold'},color:'#ff6384',formatter:(v,c)=>c.dataset.labelArray[c.dataIndex]}});
+    if(viewMode==='all'||viewMode==='sema') datasets.push({label:'세마', data:ds, borderColor:'#28a745', backgroundColor:'rgba(40,167,69,0.1)', borderWidth:2, tension:0.4, fill:true, pointRadius:prS, pointBackgroundColor:pbS, pointBorderColor:'#fff', pointHoverRadius:6, pointHoverBackgroundColor:'#28a745', labelArray:lS, datalabels:{align:'top',anchor:'end',font:{size:10,weight:'bold'},color:'#28a745',formatter:(v,c)=>c.dataset.labelArray[c.dataIndex]}});
+
+    myChart = new Chart(ctx, {
+        type: 'line', data: { labels, datasets },
+        options: { responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, scales:{x:{ticks:{autoSkip:true,maxTicksLimit:6}}, y:{beginAtZero:true,title:{display:false},ticks:{padding:10}}}, layout:{padding:{left:10,right:25,top:25,bottom:10}}, plugins:{legend:{display:false}, datalabels:{display:true}, tooltip:{enabled:false, external: customTooltip}} }
+    });
+    
+    function customTooltip(context) {
+        const el = document.getElementById('chartTooltip');
+        const model = context.tooltip;
+        if(model.opacity === 0) return;
+        if(model.body) {
+             const title = new Date(s + model.dataPoints[0].dataIndex*86400000);
+             const dateStr = `${title.getFullYear()}. ${title.getMonth()+1}. ${title.getDate()}.`;
+             const isT = title.toDateString() === new Date().toDateString();
+             
+             let doseHtml = '';
+             doses.forEach(d => {
+                 if(new Date(d.time).toDateString() === title.toDateString()) {
+                     const n = d.type==='tirz'?'터제':(d.type==='reta'?'레타':'세마');
+                     doseHtml += `<span class="tooltip-dose-badge">💉 ${n} ${d.amt}mg</span>`;
+                 }
+             });
+
+             let html = `<div class="tooltip-date">${dateStr}${isT?' (오늘)':''}</div>`;
+             if(doseHtml) html += `<div class="tooltip-doses">${doseHtml}</div>`;
+             html += '<div class="tooltip-body">';
+             model.body.forEach((b, i) => {
+                 const color = context.chart.data.datasets[model.dataPoints[i].datasetIndex].borderColor;
+                 html += `<div class="tooltip-item"><span class="color-square" style="background:${color}"></span>${b.lines[0]}</div>`;
+             });
+             html += '</div>';
+             el.innerHTML = html;
+        }
+    }
 }
 
 function renderDailyTable() {
-    const tableHead = document.querySelector('#dailyTable thead tr');
-    const tbody = document.getElementById('dailyTableBody');
-    tbody.innerHTML = '';
+    const tbody = document.getElementById('dailyTableBody'); tbody.innerHTML = '';
+    const thead = document.querySelector('#dailyTable thead tr');
+    let th = '<th style="width:25%">날짜</th>';
+    if(viewMode==='all'||viewMode==='tirz') th+='<th style="color:#36a2eb">터제</th>';
+    if(viewMode==='all'||viewMode==='reta') th+='<th style="color:#ff6384">레타</th>';
+    if(viewMode==='all'||viewMode==='sema') th+='<th style="color:#28a745">세마</th>';
+    thead.innerHTML = th;
     
-    // 1. 헤더 생성 로직 (현재 viewMode에 따라)
-    let thHtml = '<th style="width:25%">날짜</th>';
-    if(viewMode === 'all' || viewMode === 'tirz') thHtml += '<th style="color:#36a2eb">터제</th>';
-    if(viewMode === 'all' || viewMode === 'reta') thHtml += '<th style="color:#ff6384">레타</th>';
-    if(viewMode === 'all' || viewMode === 'sema') thHtml += '<th style="color:#28a745">세마</th>';
-    tableHead.innerHTML = thHtml;
-
-    const sVal = document.getElementById('searchStart').value;
-    const eVal = document.getElementById('searchEnd').value;
+    const sStr = document.getElementById('searchStart').value;
+    const eStr = document.getElementById('searchEnd').value;
     const nowTs = new Date().getTime();
+    let s = sStr ? new Date(sStr).getTime() : nowTs - 5*86400000;
+    let e = eStr ? new Date(eStr).getTime() : nowTs + 45*86400000;
+    if(!sStr && doses.length) s = doses[0].time;
 
-    // 시작일/종료일 설정
-    let startTime = sVal ? new Date(sVal).getTime() : nowTs - (5 * 86400000);
-    let endTime = eVal ? new Date(eVal).getTime() : nowTs + (45 * 86400000);
-
-    // 데이터가 있고 검색 기간이 없으면 첫 데이터부터 시작
-    if(!sVal && doses.length > 0) startTime = doses[0].time;
-
-    // 날짜 배열 생성
-    let dateList = [];
-    for (let t = startTime; t <= endTime; t += 86400000) {
-        dateList.push(t);
-    }
-
-    // 페이지네이션 계산
-    const totalItems = dateList.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    let dateList = []; for(let t=s; t<=e; t+=86400000) dateList.push(t);
+    const totalPages = Math.ceil(dateList.length / itemsPerPage);
+    if(currentPage>totalPages) currentPage=1;
     
-    if (currentPage > totalPages) currentPage = 1;
-    if (currentPage < 1) currentPage = 1;
-
-    const startIdx = (currentPage - 1) * itemsPerPage;
-    const endIdx = startIdx + itemsPerPage;
-    const pageItems = dateList.slice(startIdx, endIdx);
-
+    const pageList = dateList.slice((currentPage-1)*itemsPerPage, currentPage*itemsPerPage);
     const todayStr = new Date().toDateString();
 
-    pageItems.forEach(t => {
+    pageList.forEach(t => {
         const d = new Date(t);
-        // [수정] 날짜 포맷에 년도 추가
-        const dateStr = `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()} (${getDayName(d.getDay())})`;
-        const isToday = d.toDateString() === todayStr;
-        const rowClass = isToday ? 'today-row' : '';
-
-        // 각 약물 농도 계산
-        const valTirz = calculateTotalLevel(t, 'tirz').toFixed(2);
-        const valReta = calculateTotalLevel(t, 'reta').toFixed(2);
-        const valSema = calculateTotalLevel(t, 'sema').toFixed(2);
-
-        // 해당 날짜 투약 여부 확인
-        const dayDoses = doses.filter(dose => new Date(dose.time).toDateString() === d.toDateString());
-        
-        let tirzBadge = '', retaBadge = '', semaBadge = '';
-        
-        dayDoses.forEach(dose => {
-            if(dose.type === 'tirz') tirzBadge += `<span class="dose-badge">💉 ${dose.amt}mg</span>`;
-            if(dose.type === 'reta') retaBadge += `<span class="dose-badge">💉 ${dose.amt}mg</span>`;
-            if(dose.type === 'sema') semaBadge += `<span class="dose-badge">💉 ${dose.amt}mg</span>`;
-        });
-
+        const dateStr = `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()} (${['일','월','화','수','목','금','토'][d.getDay()]})`;
         const tr = document.createElement('tr');
-        tr.className = rowClass;
-
-        // 2. 바디 생성 로직 (현재 viewMode에 따라)
-        let rowHtml = `<td class="date-col">${dateStr}</td>`;
-        if(viewMode === 'all' || viewMode === 'tirz') rowHtml += `<td class="val-col" style="color:#36a2eb">${valTirz}${tirzBadge}</td>`;
-        if(viewMode === 'all' || viewMode === 'reta') rowHtml += `<td class="val-col" style="color:#ff6384">${valReta}${retaBadge}</td>`;
-        if(viewMode === 'all' || viewMode === 'sema') rowHtml += `<td class="val-col" style="color:#28a745">${valSema}${semaBadge}</td>`;
+        if(d.toDateString() === todayStr) tr.className = 'today-row';
         
-        tr.innerHTML = rowHtml;
+        const getBadge = (type) => doses.filter(x => new Date(x.time).toDateString() === d.toDateString() && x.type===type).map(x=>`<span class="dose-badge">💉 ${x.amt}mg</span>`).join('');
+        
+        let html = `<td class="date-col">${dateStr}</td>`;
+        if(viewMode==='all'||viewMode==='tirz') html += `<td class="val-col" style="color:#36a2eb">${calculateTotalLevel(t,'tirz').toFixed(2)}${getBadge('tirz')}</td>`;
+        if(viewMode==='all'||viewMode==='reta') html += `<td class="val-col" style="color:#ff6384">${calculateTotalLevel(t,'reta').toFixed(2)}${getBadge('reta')}</td>`;
+        if(viewMode==='all'||viewMode==='sema') html += `<td class="val-col" style="color:#28a745">${calculateTotalLevel(t,'sema').toFixed(2)}${getBadge('sema')}</td>`;
+        tr.innerHTML = html;
         tbody.appendChild(tr);
     });
-
-    renderPagination(totalPages);
+    renderPagination('paginationControls', totalPages, currentPage, (p)=>{currentPage=p; renderDailyTable();});
 }
 
-function getDayName(dayIdx) {
-    const days = ['일', '월', '화', '수', '목', '금', '토'];
-    return days[dayIdx];
+// ================= [오른쪽 탭: 펩타이드 계산기 로직] =================
+function setupPillGroup(name, id, cb) {
+    const g = document.querySelector(`.pill-row[data-group="${name}"]`);
+    const inp = document.getElementById(id);
+    g.addEventListener('click', e => {
+        const p = e.target.closest('.pill'); if(!p) return;
+        g.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
+        p.classList.add('active');
+        const v = p.getAttribute('data-value');
+        if(v==='custom') inp.focus(); else { inp.value=v; if(cb) cb(); }
+    });
 }
+function updateWaterCc() { const v = document.getElementById('waterMl').value; document.getElementById('waterCcText').innerText = v ? `${v} ml = ${v} cc` : ''; }
+function updateDoseMg() { const v = document.getElementById('doseMcg').value; document.getElementById('doseMgText').innerText = v ? `${v/1000} mg` : ''; }
 
-function renderPagination(totalPages) {
-    const container = document.getElementById('paginationControls');
-    container.innerHTML = '';
+document.getElementById('waterMl').addEventListener('input', updateWaterCc);
+document.getElementById('doseMcg').addEventListener('input', updateDoseMg);
 
-    if (totalPages <= 1) return;
+document.getElementById('resetCalcBtn').addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+    ['peptideMg','waterMl','doseMcg','intervalCount','intervalTimes','peptidePrice'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('waterCcText').innerText=''; document.getElementById('doseMgText').innerText='';
+    document.getElementById('concMgMl').innerText='-'; document.getElementById('concMcgMl').innerText='-';
+    document.getElementById('volMl').innerText='-'; document.getElementById('volCc').innerText='-';
+    document.getElementById('uiUnits').innerText='-'; document.getElementById('vialUsage').innerText='-';
+    document.getElementById('vialRemain').innerText=''; document.getElementById('calcErrorBox').style.display='none';
+    document.getElementById('monthlyCostBox').style.display='none'; document.getElementById('penWarning').style.display='none';
+});
 
-    // 이전 버튼
-    const prevBtn = document.createElement('button');
-    prevBtn.className = 'page-btn';
-    prevBtn.innerHTML = '‹';
-    prevBtn.disabled = currentPage === 1;
-    prevBtn.onclick = () => changePage(currentPage - 1);
-    container.appendChild(prevBtn);
-
-    // 페이지 번호
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, currentPage + 2);
-
-    if (endPage - startPage < 4) {
-        if (startPage === 1) endPage = Math.min(totalPages, startPage + 4);
-        else if (endPage === totalPages) startPage = Math.max(1, endPage - 4);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-        const btn = document.createElement('button');
-        btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
-        btn.innerText = i;
-        btn.onclick = () => changePage(i);
-        container.appendChild(btn);
-    }
-
-    // 다음 버튼
-    const nextBtn = document.createElement('button');
-    nextBtn.className = 'page-btn';
-    nextBtn.innerHTML = '›';
-    nextBtn.disabled = currentPage === totalPages;
-    nextBtn.onclick = () => changePage(currentPage + 1);
-    container.appendChild(nextBtn);
-}
-
-function changePage(page) {
-    currentPage = page;
-    renderDailyTable();
-}
+document.getElementById('calcBtn').addEventListener('click', () => {
+    const err = document.getElementById('calcErrorBox'); err.style.display='none';
+    const pMg = parseFloat(document.getElementById('peptideMg').value), wMl = parseFloat(document.getElementById('waterMl').value);
+    const dMcg = parseFloat(document.getElementById('doseMcg').value), iCount = parseFloat(document.getElementById('intervalCount').value);
+    const iTimes = parseFloat(document.getElementById('intervalTimes').value);
+    
+    if(!pMg || !wMl || !dMcg || !iCount || !iTimes) { err.innerText = "모든 값을 입력해주세요."; err.style.display='block'; return; }
+    
+    const concMg = pMg/wMl, concMcg = concMg*1000, vol = dMcg/concMcg, ui = vol*100;
+    
+    document.getElementById('concMgMl').innerText = `${concMg.toFixed(2)} mg/ml`;
+    document.getElementById('concMcgMl').innerText = `${concMcg.toFixed(0)} mcg/ml`;
+    document.getElementById('volMl').innerText = `${vol.toFixed(3)} ml`;
+    document.getElementById('volCc').innerText = `${vol.toFixed(3)} cc`;
+    document.getElementById('uiUnits').innerText = `${ui.toFixed(1)} U`;
+    
+    const warn = document.getElementById('penWarning');
+    if(ui > 60) { warn.style.display='block'; warn.innerText = `⚠️ 60 U 초과 (약 ${Math.ceil(ui/60)}회로 분할 투여)`; }
+    else warn.style.display='none';
+    
+    const totalMcg = pMg*1000, doses = Math.floor(totalMcg/dMcg);
+    const unit = document.getElementById('intervalUnit').value === 'day' ? '일' : '주';
+    document.getElementById('vialUsage').innerText = `${Math.floor(doses*iCount/iTimes)}${unit}`;
+    
+    const remain = totalMcg - (doses*dMcg);
+    document.getElementById('vialRemain').innerText = remain > 0 ? `(잔여: ${Math.round(remain)} mcg)` : '';
+    
+    const curr = document.getElementById('currencyUnit').value, price = parseFloat(document.getElementById('peptidePrice').value);
+    if(curr && price > 0) {
+        const days = unit === 'day' ? iCount : iCount*7;
+        const vialsPerMonth = ((iTimes/days)*30*dMcg) / totalMcg;
+        const unitPrice = document.getElementById('peptidePriceType').value === 'kit' ? price/10 : price;
+        const cost = vialsPerMonth * unitPrice;
+        document.getElementById('monthlyCostBox').style.display = 'block';
+        document.getElementById('monthlyCostValue').innerText = `${curr==='KRW'?'₩':'$'}${curr==='KRW'?Math.round(cost).toLocaleString():cost.toFixed(2)}`;
+        document.getElementById('monthlyCostDetail').innerText = `약 ${vialsPerMonth.toFixed(1)}병/월`;
+    } else document.getElementById('monthlyCostBox').style.display='none';
+});
 </script>
 </body>
 </html>
