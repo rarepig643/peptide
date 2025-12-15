@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>펩타이드 매니저 (DB연동 최종)</title>
+<title>펩타이드 매니저 (최종_수정)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <style>
@@ -11,7 +11,7 @@
   * { -webkit-tap-highlight-color: transparent; font-family: -apple-system, sans-serif; box-sizing: border-box; }
   body { padding: 20px; background: #f4f7f6; max-width: 800px; margin: 0 auto; padding-bottom: 100px; color:#333; }
   
-  /* 입력창 및 버튼 공통 */
+  /* 입력창 및 버튼 */
   input, select, button { -webkit-appearance: none; appearance: none; border-radius: 8px; border: 1px solid #ddd; height: 46px; font-size: 16px; text-align: center; background: white; }
   input:focus, select:focus { outline: none; border-color: #333; }
   button { cursor: pointer; color: white; border: none; font-weight: bold; }
@@ -22,9 +22,15 @@
   .input-group { display: flex; gap: 8px; margin-bottom: 10px; width: 100%; }
   .btn-add { background: #28a745; width: 100%; margin-bottom: 20px; font-size: 1.1rem; }
   
-  /* 체크박스 스타일 (오류 해결) */
-  input[type="checkbox"] { width: 20px; height: 20px; vertical-align: middle; accent-color: #dc3545; cursor: pointer; margin-right: 8px; -webkit-appearance: checkbox; display: inline-block; }
-  label { display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; }
+  /* 체크박스 강제 표시 (오류 해결 핵심) */
+  input[type="checkbox"] { 
+      appearance: auto !important; -webkit-appearance: auto !important; /* 브라우저 기본 스타일 강제 */
+      width: 20px !important; height: 20px !important; 
+      vertical-align: middle; cursor: pointer; margin-right: 10px; 
+      display: inline-block !important; opacity: 1 !important;
+  }
+  .chk-row { display: flex; align-items: center; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; }
+  .chk-label { font-size: 1rem; font-weight: bold; cursor: pointer; flex: 1; text-align: left; color: #333; }
 
   /* 상태 카드 */
   .status-board { display: flex; flex-direction: column; gap: 10px; margin: 10px 0 20px; }
@@ -41,16 +47,8 @@
   .tab-btn { flex: 1; background: #f8f9fa; color: #555; height: 36px; border-radius: 20px; font-size: 0.9rem; }
   .tab-btn.active { background: #333; color: white; }
   
-  /* 차트 */
+  /* 차트 및 리스트 */
   .chart-box { height: 280px; margin-bottom: 20px; }
-  
-  /* 테이블 */
-  .daily-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; text-align: center; }
-  .daily-table th { background: #f8f9fa; padding: 10px; border-bottom: 2px solid #eee; }
-  .daily-table td { padding: 12px; border-bottom: 1px solid #f0f0f0; }
-  .today-row { background-color: #fff9c4; font-weight: bold; }
-  
-  /* 리스트 */
   .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid #eee; }
   .tag { padding: 4px 8px; border-radius: 4px; color: white; font-size: 0.8em; margin-right: 8px; font-weight: bold; }
   .tag.tirz { background: #36a2eb; } .tag.reta { background: #ff6384; } .tag.sema { background: #28a745; } .tag.weight { background: #6610f2; }
@@ -61,7 +59,7 @@
   .modal-box { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 320px; text-align: center; }
   .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
   .btn-pop { flex: 1; border-radius: 8px; color: white; }
-  .bg-gray { background: #6c757d; } .bg-blue { background: #36a2eb; } .bg-red { background: #dc3545; } .bg-purple { background: #6610f2; }
+  .bg-gray { background: #6c757d; } .bg-blue { background: #36a2eb; } .bg-red { background: #dc3545; }
 
   /* 페이지 전환 */
   .page-section { display: none; } .page-section.active { display: block; }
@@ -99,7 +97,7 @@
                     <option value="reta">레타트루타이드 (6일)</option>
                     <option value="sema">세마글루타이드 (7일)</option>
                 </select>
-                <input type="number" id="doseAmt" placeholder="mg" style="flex:1;">
+                <input type="number" id="doseAmt" placeholder="용량 (mg)" style="flex:1;">
             </div>
             <div class="input-group">
                 <input type="date" id="inputDate">
@@ -190,9 +188,18 @@
     <div class="modal-box">
         <h3 style="color:#dc3545">⚠️ 데이터 삭제</h3>
         <div style="text-align:left; padding:10px;">
-            <label><input type="checkbox" id="checkTirz"> 터제파타이드</label>
-            <label><input type="checkbox" id="checkReta"> 레타트루타이드</label>
-            <label><input type="checkbox" id="checkSema"> 세마글루타이드</label>
+            <div class="chk-row">
+                <input type="checkbox" id="checkTirz">
+                <label for="checkTirz" class="chk-label">터제파타이드</label>
+            </div>
+            <div class="chk-row">
+                <input type="checkbox" id="checkReta">
+                <label for="checkReta" class="chk-label">레타트루타이드</label>
+            </div>
+            <div class="chk-row">
+                <input type="checkbox" id="checkSema">
+                <label for="checkSema" class="chk-label">세마글루타이드</label>
+            </div>
         </div>
         <div class="modal-btns">
             <button class="btn-pop bg-gray" onclick="closeResetModal()">취소</button>
@@ -202,12 +209,12 @@
 </div>
 
 <script type="module">
-  // [1] 파이어베이스 설정 (키값 본인것으로!)
+  // [1] 중요: 브라우저용 파이어베이스 주소 사용 (절대 'firebase/app' 쓰지 마세요!)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-  // ▼▼▼ 여기에 본인 키값 붙여넣기 ▼▼▼
+  // ▼▼▼ 본인 키값으로 교체 필수 ▼▼▼
   const firebaseConfig = {
     apiKey: "AIzaSyDcrkHfImrYEZfy5Q0awsqCwL8BxkeHzF0",
     authDomain: "peptide-manager.firebaseapp.com",
@@ -217,23 +224,24 @@
     appId: "1:571787275208:web:66d40af3559d6d859d2efd",
     measurementId: "G-HR40KWW12W"
   };
-  // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+  // ▲▲▲ 교체 끝 ▲▲▲
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
   let currentUser = null;
 
-  // 변수
+  // 전역 변수
   let doses = [], weightData = [];
   let myChart, weightChart;
   let viewMode = 'all';
   let currentEditType = '';
+  const PK = { tirz: [5, 1], reta: [6, 1.5], sema: [7, 2] }; 
 
-  const PK = { tirz: [5, 1], reta: [6, 1.5], sema: [7, 2] }; // 반감기
-
-  // [2] 로그인 처리
-  document.getElementById('btnLogin').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()));
+  // [2] 로그인 로직
+  document.getElementById('btnLogin').addEventListener('click', () => {
+      signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert("로그인 실패: " + e.message));
+  });
   window.logout = () => signOut(auth);
 
   onAuthStateChanged(auth, (user) => {
@@ -253,14 +261,14 @@
   function initApp() {
     setNow(); setWeightNow();
     
-    // DB 리스너 (투약)
+    // 투약 데이터 연결
     const qDose = query(collection(db, "doses"), where("uid", "==", currentUser.uid), orderBy("time", "asc"));
     onSnapshot(qDose, (snap) => {
         doses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         updateManager();
     });
 
-    // DB 리스너 (체중)
+    // 체중 데이터 연결
     const qWeight = query(collection(db, "weights"), where("uid", "==", currentUser.uid), orderBy("time", "asc"));
     onSnapshot(qWeight, (snap) => {
         weightData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -268,32 +276,25 @@
     });
   }
 
-  // [3] 기능 함수들 (window에 등록하여 HTML에서 호출 가능하게 함)
-  
-  // -- 날짜 세팅 --
+  // [3] 버튼 기능 연결 (window 객체에 할당)
   window.setNow = () => { document.getElementById('inputDate').value = new Date().toISOString().split('T')[0]; document.getElementById('inputTime').value = new Date().toTimeString().slice(0,5); };
   window.setWeightNow = () => { document.getElementById('weightDate').value = new Date().toISOString().split('T')[0]; document.getElementById('weightTime').value = new Date().toTimeString().slice(0,5); };
 
-  // -- 추가 로직 --
   window.add = async () => {
-    if(!currentUser) return;
+    if(!currentUser) return alert("로그인 상태가 아닙니다.");
     const type = document.getElementById('drugType').value;
     const amt = parseFloat(document.getElementById('doseAmt').value);
     const date = document.getElementById('inputDate').value;
     const time = document.getElementById('inputTime').value;
     
-    if(!amt || !date || !time) return alert("값을 입력해주세요.");
+    if(!amt || !date || !time) return alert("용량과 시간을 모두 입력해주세요.");
     
     try {
         await addDoc(collection(db, "doses"), {
-            uid: currentUser.uid,
-            type: type,
-            amt: amt,
-            time: new Date(`${date}T${time}`).getTime(),
-            manual: false
+            uid: currentUser.uid, type, amt, time: new Date(`${date}T${time}`).getTime(), manual: false
         });
-        alert("추가되었습니다.");
-    } catch(e) { alert("저장 실패: " + e.message); }
+        alert("기록이 추가되었습니다.");
+    } catch(e) { alert("오류: " + e.message); }
   };
 
   window.addWeight = async () => {
@@ -301,21 +302,18 @@
     const w = parseFloat(document.getElementById('weightInput').value);
     const date = document.getElementById('weightDate').value;
     const time = document.getElementById('weightTime').value;
-    if(!w) return;
-
+    if(!w) return alert("체중을 입력해주세요.");
+    
     await addDoc(collection(db, "weights"), {
-        uid: currentUser.uid,
-        weight: w,
-        time: new Date(`${date}T${time}`).getTime()
+        uid: currentUser.uid, weight: w, time: new Date(`${date}T${time}`).getTime()
     });
+    alert("체중이 저장되었습니다.");
     document.getElementById('weightInput').value = '';
   };
 
-  // -- 삭제 로직 --
-  window.delDose = async (id) => { if(confirm("삭제합니까?")) await deleteDoc(doc(db, "doses", id)); };
-  window.delWeight = async (id) => { if(confirm("삭제합니까?")) await deleteDoc(doc(db, "weights", id)); };
+  window.delDose = async (id) => { if(confirm("삭제하시겠습니까?")) await deleteDoc(doc(db, "doses", id)); };
+  window.delWeight = async (id) => { if(confirm("삭제하시겠습니까?")) await deleteDoc(doc(db, "weights", id)); };
 
-  // -- 모달 관련 --
   window.openEditModal = (t) => { currentEditType = t; document.getElementById('editModal').style.display = 'flex'; };
   window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
   
@@ -323,15 +321,9 @@
       if(!currentUser) return;
       const v = parseFloat(document.getElementById('editInput').value);
       if(isNaN(v)) return alert("숫자를 입력하세요");
-      
-      await addDoc(collection(db, "doses"), {
-          uid: currentUser.uid,
-          type: currentEditType,
-          amt: v,
-          time: Date.now(),
-          manual: true
-      });
+      await addDoc(collection(db, "doses"), { uid: currentUser.uid, type: currentEditType, amt: v, time: Date.now(), manual: true });
       closeEditModal();
+      alert("수정되었습니다.");
   };
 
   window.openResetModal = () => document.getElementById('resetModal').style.display = 'flex';
@@ -341,13 +333,13 @@
       const t = document.getElementById('checkTirz').checked;
       const r = document.getElementById('checkReta').checked;
       const s = document.getElementById('checkSema').checked;
-      
       const toDel = doses.filter(d => (t && d.type === 'tirz') || (r && d.type === 'reta') || (s && d.type === 'sema'));
       
-      if(toDel.length === 0) return alert("선택된 항목이 없습니다.");
-      if(confirm(`총 ${toDel.length}개 데이터를 삭제합니다.`)) {
+      if(toDel.length === 0) return alert("선택된 기록이 없습니다.");
+      if(confirm(`${toDel.length}개의 기록을 삭제합니다.`)) {
           for(const d of toDel) await deleteDoc(doc(db, "doses", d.id));
           closeResetModal();
+          alert("삭제 완료.");
       }
   };
 
@@ -367,55 +359,46 @@
       if(page === 'weight' && weightChart) setTimeout(()=>weightChart.resize(), 10);
   };
 
-  // [4] 계산 및 렌더링
+  // [4] 계산 및 화면 그리기
   function calcLevel(type) {
       const now = Date.now();
       const half = PK[type][0];
-      
       let total = 0;
       const history = doses.filter(d => d.type === type).sort((a,b)=>a.time-b.time);
+      let lastMan = -1;
+      history.forEach((h, i) => { if(h.manual && h.time <= now) lastMan = i; });
       
-      // 수동설정 찾기
-      let lastManualIdx = -1;
-      history.forEach((h, i) => { if(h.manual && h.time <= now) lastManualIdx = i; });
-      
-      if(lastManualIdx > -1) {
-          const m = history[lastManualIdx];
+      if(lastMan > -1) {
+          const m = history[lastMan];
           total = m.amt * Math.pow(0.5, (now - m.time) / 86400000 / half);
       }
-      
-      for(let i = lastManualIdx + 1; i < history.length; i++) {
+      for(let i = lastMan + 1; i < history.length; i++) {
           const d = history[i];
           if(d.time > now) break;
           if(!d.manual) {
               const days = (now - d.time) / 86400000;
-              total += d.amt * Math.pow(0.5, days/half); // 단순 반감기 계산
+              total += d.amt * Math.pow(0.5, days/half);
           }
       }
       return total;
   }
 
   function updateManager() {
-      // 1. 현재 농도 표시
       document.getElementById('valTirz').innerText = calcLevel('tirz').toFixed(2);
       document.getElementById('valReta').innerText = calcLevel('reta').toFixed(2);
       document.getElementById('valSema').innerText = calcLevel('sema').toFixed(2);
 
-      // 2. 리스트 그리기
       const el = document.getElementById('historyList'); el.innerHTML = '';
       const filtered = doses.filter(d => viewMode === 'all' || d.type === viewMode).sort((a,b)=>b.time-a.time);
       
       filtered.forEach(d => {
           const dt = new Date(d.time);
-          const dateStr = `${dt.getMonth()+1}.${dt.getDate()} ${dt.getHours()}:${String(dt.getMinutes()).padStart(2,'0')}`;
           el.innerHTML += `
             <div class="list-item">
-                <div><span class="tag ${d.type}">${d.type}</span> <b>${d.amt}mg</b> <span style="color:#888; font-size:0.8em">(${dateStr})</span> ${d.manual?'<span style="color:red;font-size:0.7em">[수동]</span>':''}</div>
+                <div><span class="tag ${d.type}">${d.type}</span> <b>${d.amt}mg</b> <span style="color:#888; font-size:0.8em">(${dt.getMonth()+1}.${dt.getDate()})</span> ${d.manual?'<span style="color:red">[수동]</span>':''}</div>
                 <button class="del-btn" onclick="delDose('${d.id}')">✕</button>
             </div>`;
       });
-
-      // 3. 차트 그리기
       drawChart();
   }
 
@@ -438,59 +421,36 @@
   function drawChart() {
       const ctx = document.getElementById('myChart').getContext('2d');
       if(myChart) myChart.destroy();
-      
       const labels = [], d1=[], d2=[], d3=[];
       const start = Date.now() - 5*86400000;
       for(let i=0; i<20; i++) {
           const t = start + i*86400000;
           labels.push(new Date(t).getDate());
-          d1.push(calcSim(t, 'tirz'));
-          d2.push(calcSim(t, 'reta'));
-          d3.push(calcSim(t, 'sema'));
+          d1.push(calcSim(t, 'tirz')); d2.push(calcSim(t, 'reta')); d3.push(calcSim(t, 'sema'));
       }
-      
-      myChart = new Chart(ctx, {
-          type: 'line',
-          data: { labels, datasets: [
-              { label:'T', data:d1, borderColor:'#36a2eb', borderWidth:2, pointRadius:1 },
-              { label:'R', data:d2, borderColor:'#ff6384', borderWidth:2, pointRadius:1 },
-              { label:'S', data:d3, borderColor:'#28a745', borderWidth:2, pointRadius:1 }
-          ]},
-          options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }
-      });
+      myChart = new Chart(ctx, { type: 'line', data: { labels, datasets: [
+          { label:'T', data:d1, borderColor:'#36a2eb', borderWidth:2, pointRadius:1 },
+          { label:'R', data:d2, borderColor:'#ff6384', borderWidth:2, pointRadius:1 },
+          { label:'S', data:d3, borderColor:'#28a745', borderWidth:2, pointRadius:1 }
+      ]}, options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} } });
   }
 
   function drawWeightChart() {
       const ctx = document.getElementById('weightChart').getContext('2d');
       if(weightChart) weightChart.destroy();
-      
       const data = weightData.sort((a,b)=>a.time-b.time);
-      weightChart = new Chart(ctx, {
-          type: 'line',
-          data: { 
-              labels: data.map(d=>new Date(d.time).getDate()), 
-              datasets: [{ data: data.map(d=>d.weight), borderColor:'#6610f2', fill:true, backgroundColor:'rgba(102,16,242,0.1)' }]
-          },
-          options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }
-      });
+      weightChart = new Chart(ctx, { type: 'line', data: { labels: data.map(d=>new Date(d.time).getDate()), datasets: [{ data: data.map(d=>d.weight), borderColor:'#6610f2', fill:true, backgroundColor:'rgba(102,16,242,0.1)' }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} } });
   }
 
   function calcSim(time, type) {
-      let sum = 0;
       const h = PK[type][0];
       const targets = doses.filter(d=>d.type===type && d.time <= time);
-      let lastMan = -1;
-      targets.forEach((d,i)=>{ if(d.manual) lastMan=i; });
-      
-      if(lastMan > -1) {
-          sum = targets[lastMan].amt * Math.pow(0.5, (time-targets[lastMan].time)/86400000/h);
-      }
-      for(let i=lastMan+1; i<targets.length; i++) {
-          sum += targets[i].amt * Math.pow(0.5, (time-targets[i].time)/86400000/h);
-      }
+      let lastMan = -1; targets.forEach((d,i)=>{ if(d.manual) lastMan=i; });
+      let sum = 0;
+      if(lastMan > -1) sum = targets[lastMan].amt * Math.pow(0.5, (time-targets[lastMan].time)/86400000/h);
+      for(let i=lastMan+1; i<targets.length; i++) sum += targets[i].amt * Math.pow(0.5, (time-targets[i].time)/86400000/h);
       return sum;
   }
-
 </script>
 </body>
 </html>
