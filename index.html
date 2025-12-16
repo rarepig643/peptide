@@ -10,73 +10,73 @@
 <style>
   /* ================= [기본 스타일] ================= */
   * {
-    -webkit-touch-callout: none; 
-    -webkit-user-select: none;   
-    user-select: none;           
-    -webkit-tap-highlight-color: transparent; 
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", sans-serif;
     box-sizing: border-box;
   }
 
   input, select { -webkit-user-select: auto; user-select: auto; }
 
-  body { 
-      padding: 20px; 
-      background: #f4f7f6; 
-      max-width: 800px; 
-      margin: 0 auto; 
-      touch-action: manipulation; 
-      color: #333; 
-      padding-bottom: 90px; /* 하단 탭바 공간 */
+  body {
+      padding: 20px;
+      background: #f4f7f6;
+      max-width: 800px;
+      margin: 0 auto;
+      touch-action: manipulation;
+      color: #333;
+      padding-bottom: 65px; /* 하단 탭바 높이(65px)만큼 여백 확보 */
   }
-  
+
   .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;}
   h2 { text-align: center; color: #333; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-  
+
   /* 공통 입력창 스타일 */
-  select, input, button { 
-      padding: 0 5px; 
-      border-radius: 8px; 
-      border: 1px solid #ddd; 
-      font-size: 16px; 
-      height: 46px; 
+  select, input, button {
+      padding: 0 5px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      height: 46px;
       line-height: normal;
       text-align: center;
       background: white;
-      -webkit-appearance: none; 
+      -webkit-appearance: none;
   }
-  
+
   input:focus, select:focus { outline: none; border-color: #333; }
 
   button { cursor: pointer; color: white; border: none; font-weight: bold; transition: 0.2s; }
   .btn-add { background: #28a745; width: 100%; margin-bottom: 20px; font-size: 1.1rem; }
   .btn-reset { width: 100%; background: #6c757d; margin-top: 20px; padding:0; border-radius:8px; color:white; border:none; font-weight:bold; height: 46px; font-size: 1rem; }
-  
+
   .input-group { display: flex; gap: 8px; margin-bottom: 10px; width: 100%; }
   .date-time-group { display: flex; gap: 5px; width: 100%; margin-bottom: 15px; }
-  
+
   input[type="date"], input[type="time"] { flex: 1; padding: 0; justify-content: center; display: flex; align-items: center; }
   .btn-now { background: #6c757d; flex: 0 0 50px; font-size: 13px; padding: 0; }
 
   /* 펩타이드 매니저 상단 입력창 정렬 수정 */
-  select#drugType { 
-      flex: 1.6; 
-      width: 0; 
-      background: #f9f9f9; 
-      font-weight: bold; 
-      text-align-last: center; 
-      min-width: 0; 
+  select#drugType {
+      flex: 1.6;
+      width: 0;
+      background: #f9f9f9;
+      font-weight: bold;
+      text-align-last: center;
+      min-width: 0;
   }
-  input#doseAmt { 
-      flex: 1; 
-      width: 0; 
-      min-width: 0; 
+  input#doseAmt {
+      flex: 1;
+      width: 0;
+      min-width: 0;
   }
 
   /* 체크박스 */
   input[type="checkbox"] {
       -webkit-appearance: checkbox !important; appearance: checkbox !important;
-      width: 24px !important; height: 24px !important; 
+      width: 24px !important; height: 24px !important;
       margin-right: 10px; vertical-align: middle;
       background: none !important; border: 1px solid #ddd !important;
       cursor: pointer;
@@ -92,13 +92,13 @@
   .edit-btn { background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; height: auto; white-space: nowrap; }
 
   /* 카드 색상 */
-  .card-tirz { background: linear-gradient(90deg, #36a2eb, #0056b3); } 
-  .card-reta { background: linear-gradient(90deg, #ff6384, #c82333); } 
-  .card-sema { background: linear-gradient(90deg, #28a745, #1e7e34); } 
+  .card-tirz { background: linear-gradient(90deg, #36a2eb, #0056b3); }
+  .card-reta { background: linear-gradient(90deg, #ff6384, #c82333); }
+  .card-sema { background: linear-gradient(90deg, #28a745, #1e7e34); }
   .card-weight-cur { background: linear-gradient(90deg, #6610f2, #490bc4); }
   .card-weight-goal { background: linear-gradient(90deg, #fd7e14, #d96200); }
   .card-weight-bmi { background: linear-gradient(90deg, #20c997, #158c68); }
-  .card-bmi-calc { background: linear-gradient(90deg, #17a2b8, #117a8b); } 
+  .card-bmi-calc { background: linear-gradient(90deg, #17a2b8, #117a8b); }
   .card-bmr-calc { background: linear-gradient(90deg, #e83e8c, #d63384); }
 
   /* ================= [기간 조회 및 뷰 토글] ================= */
@@ -118,11 +118,11 @@
   .tab-container { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; }
   .tab-btn { padding: 0 12px; border-radius: 20px; border: 1px solid #ddd; background: #f8f9fa; color: #555; font-size: 0.9em; font-weight: bold; transition: 0.2s; flex: 1; max-width: 100px; height: 36px; line-height: 34px; white-space: nowrap; }
   .tab-btn.active { background: #333; color: white; border-color: #333; }
-  
+
   /* ================= [차트 및 테이블] ================= */
   .chart-box { height: 300px; position: relative; margin-bottom: 0px; display: block; }
   canvas { touch-action: none; }
-  
+
   .chart-tooltip-custom { background: #333; color: white; padding: 12px; border-radius: 8px; margin-bottom: 10px; min-height: 50px; text-align: center; font-size: 0.9rem; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s ease; }
   .tooltip-date { font-weight: bold; margin-bottom: 6px; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; width: 100%; }
   .tooltip-doses { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; width: 100%; flex-wrap: wrap; }
@@ -138,7 +138,7 @@
   .daily-table td { padding: 14px 5px; border-bottom: 1px solid #f0f0f0; text-align: center; vertical-align: middle; color: #666; }
   .daily-table .today-row { background-color: #fff9c4; font-weight: bold; border-left: 3px solid #ffc107; border-right: 3px solid #ffc107; }
   .daily-table .today-row td { color: #333; }
-  
+
   .val-col { font-weight: bold; font-size: 0.95em; line-height: 1.2; }
   .date-col { color: #666; font-size: 0.9em; letter-spacing: -0.5px; }
   .dose-badge { display: block; font-size: 0.75em; color: #dc3545; font-weight: normal; margin-top: 2px; }
@@ -153,13 +153,13 @@
   .full-history-section { margin-top: 40px; padding-top: 20px; border-top: 4px solid #f4f7f6; }
   .history-header { display:flex; justify-content:space-between; align-items:center; margin:10px 0; flex-wrap: wrap; gap: 10px; }
   .history-box { border-top: 2px solid #eee; padding-top: 10px; }
-  
+
   .list-item { display: flex; justify-content: space-between; padding: 15px 5px; border-bottom: 1px solid #f0f0f0; align-items: center; }
   .tag { padding: 4px 8px; border-radius: 4px; color: white; font-size: 0.8em; margin-right: 10px; font-weight: bold; }
   .tag.tirz { background: #36a2eb; } .tag.reta { background: #ff6384; } .tag.sema { background: #28a745; }
   .tag.weight { background: #6610f2; }
   .manual-tag { color: #dc3545; font-size: 0.75em; margin-left: 5px; font-weight: bold; }
-  
+
   .action-group { display: flex; gap: 10px; }
   .list-btn { background: none; border: none; font-size: 1.4em; padding: 8px; color: #aaa; cursor: pointer; height: auto; min-width: 30px; }
   .btn-del-sel { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; height: 36px;}
@@ -173,7 +173,7 @@
   @media (min-width: 600px) { .calc-grid { grid-template-columns: repeat(2, 1fr); } }
   .calc-group { background: #fafafa; padding: 15px; border-radius: 10px; border: 1px solid #eee; }
   .input-label { font-size: 0.9rem; color: #666; font-weight: 600; margin-bottom: 8px; display: block; text-align: left; }
-  
+
   .pill-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
   .pill { padding: 0 12px; border-radius: 20px; border: 1px solid #ddd; background: #f8f9fa; color: #555; font-size: 0.9em; font-weight: bold; flex: 1; height: 36px; line-height: 34px; white-space: nowrap; cursor: pointer; text-align: center; }
   .pill.active { background: #333; color: white; border-color: #333; }
@@ -181,7 +181,12 @@
   .calc-input { width: 100%; font-size: 16px; height: 46px; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: white; margin-bottom: 5px;}
   .calc-select { width: 100%; font-size: 16px; height: 46px; border: 1px solid #ddd; border-radius: 8px; text-align: center; background: white; margin-bottom: 5px; -webkit-appearance: none; font-weight: bold; }
   .muted-text { font-size: 0.85em; color: #27ae60; margin-top: 4px; font-weight: bold; text-align: center; min-height: 1.2em;}
-  
+
+  /* 펩타이드 계산기의 셀렉트 박스 텍스트 중앙 정렬 */
+  #intervalUnit, #currencyUnit, #peptidePriceType {
+      text-align-last: center;
+  }
+
   .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; border-top: 2px dashed #eee; padding-top: 20px; }
   .result-box { background: #e8f6f3; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #27ae60; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
   .result-title { font-size: 0.85em; color: #27ae60; font-weight: bold; margin-bottom: 5px; }
@@ -197,11 +202,11 @@
   .modal-input { width: 100%; height: 46px; padding: 0 10px; font-size: 16px; margin-bottom: 15px; border: 2px solid #36a2eb; border-radius: 8px; background-color: white; display: block; text-align: center; }
   .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
   .btn-pop { flex: 1; padding: 0; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; height: 46px; }
-  .bg-blue { background: #36a2eb; } 
-  .bg-red { background: #dc3545; } 
+  .bg-blue { background: #36a2eb; }
+  .bg-red { background: #dc3545; }
   .bg-gray { background: #6c757d; }
   .bg-purple { background: #6610f2; }
-  
+
   .chk-label { display: flex; align-items: center; margin-bottom: 10px; font-size: 1rem; cursor: pointer; justify-content: flex-start; padding-left: 10px;}
 
   /* ================= [하단 고정 네비게이션] ================= */
@@ -226,7 +231,7 @@
 <div id="section-manager" class="page-section active">
     <div class="container">
       <h2>💉 펩타이드 매니저</h2>
-      
+
       <div class="input-group">
         <select id="drugType">
           <option value="tirz">터제파타이드 (5일)</option>
@@ -235,15 +240,15 @@
         </select>
         <input type="number" id="doseAmt" placeholder="용량 (mg)" step="0.1">
       </div>
-      
+
       <div class="date-time-group">
         <input type="date" id="inputDate" oninput="checkDate(this)">
         <input type="time" id="inputTime" oninput="checkTime(this)">
-        <button class="btn-now" type="button" onclick="setNow()">현재</button> 
+        <button class="btn-now" type="button" onclick="setNow()">현재</button>
       </div>
-      
+
       <button class="btn-add" type="button" onclick="add()">+ 기록 추가</button>
-    
+
       <div class="status-board">
         <div class="status-card card-tirz">
           <div class="drug-name">터제파타이드</div>
@@ -261,7 +266,7 @@
           <button class="edit-btn" onclick="openEditModal('sema')">수정</button>
         </div>
       </div>
-    
+
       <div class="date-range-box">
           <div class="range-header">
               <div class="range-title">📅 조회 기간 설정</div>
@@ -274,27 +279,27 @@
               <button class="btn-search" onclick="searchUpdate()">조회</button>
           </div>
       </div>
-    
+
       <div class="view-toggle-container">
         <button class="view-btn active" id="btnShowGraph" onclick="setDisplayType('chart')">📊 그래프 보기</button>
         <button class="view-btn" id="btnShowList" onclick="setDisplayType('list')">📝 목록 보기</button>
       </div>
-    
+
       <div class="tab-container">
         <button class="tab-btn active" id="btnAll" onclick="setViewMode('all')">전체</button>
         <button class="tab-btn" id="btnTirz" onclick="setViewMode('tirz')" style="color:#36a2eb;">터제</button>
         <button class="tab-btn" id="btnReta" onclick="setViewMode('reta')" style="color:#ff6384;">레타</button>
         <button class="tab-btn" id="btnSema" onclick="setViewMode('sema')" style="color:#28a745;">세마</button>
       </div>
-    
+
       <div id="chartTooltip" class="chart-tooltip-custom">
           <span style="color:#aaa;">그래프를 터치하면 상세 정보가 표시됩니다.</span>
       </div>
-    
+
       <div class="chart-box" id="chartArea">
         <canvas id="myChart"></canvas>
       </div>
-      
+
       <div class="list-wrapper" id="listArea">
           <h3 style="margin:20px 0 10px; font-size:1.1em; color:#555;">📅 일별 농도 (투여일 표시)</h3>
           <table class="daily-table" id="dailyTable">
@@ -303,7 +308,7 @@
           </table>
           <div class="pagination-container" id="paginationControls"></div>
       </div>
-    
+
       <div id="historySection">
           <div class="history-header">
               <h3 style="margin:0; font-size:1.1em; color:#555;">💉 투약 기록 관리</h3>
@@ -321,7 +326,7 @@
           <div class="history-box" id="historyList"></div>
           <div class="pagination-container" id="historyPaginationControls"></div>
       </div>
-      
+
       <button class="btn-reset" onclick="openResetModal()">🗑 데이터 초기화</button>
     </div>
 </div>
@@ -330,7 +335,7 @@
     <div class="container">
         <h2>🧮 펩타이드 계산기</h2>
         <div id="calcErrorBox" class="error-box"></div>
-        
+
         <div class="calc-sub-title">1. 재구성 조건</div>
         <div class="calc-grid">
             <div class="calc-group">
@@ -447,7 +452,7 @@
 <div id="section-weight" class="page-section">
     <div class="container">
       <h2>⚖️ 체중 관리</h2>
-      
+
       <div class="input-group">
         <input type="number" id="userHeight" placeholder="키 (cm)" style="width:100%; font-weight:bold;" oninput="saveWeightProfile()">
       </div>
@@ -465,7 +470,7 @@
       <div class="date-time-group">
         <input type="date" id="weightDate" oninput="checkDate(this)">
         <input type="time" id="weightTime" oninput="checkTime(this)">
-        <button class="btn-now" type="button" onclick="setWeightNow()">현재</button> 
+        <button class="btn-now" type="button" onclick="setWeightNow()">현재</button>
       </div>
       <button class="btn-add" type="button" onclick="addWeight()">+ 체중 기록</button>
 
@@ -680,11 +685,11 @@ function switchPage(pageName, navEl) {
     navEl.classList.add('active');
     document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
     document.getElementById(`section-${pageName}`).classList.add('active');
-    
+
     // 차트 리사이징 트리거
     if(pageName === 'manager' && myChart) { setTimeout(() => { myChart.resize(); }, 50); }
     if(pageName === 'weight' && weightChart) { setTimeout(() => { weightChart.resize(); }, 50); }
-    
+
     window.scrollTo(0, 0);
 }
 
@@ -707,10 +712,10 @@ Chart.register(ChartDataLabels);
 let doses = JSON.parse(localStorage.getItem('pep_history_final_v15')) || [];
 const ctx = document.getElementById('myChart').getContext('2d');
 let myChart;
-let currentEditType = '', viewMode = 'all', displayType = 'chart'; 
-let deleteTargetId = null, editTargetId = null, deleteTargetIds = []; 
-let currentPage = 1, currentHistoryPage = 1; 
-const itemsPerPage = 15; 
+let currentEditType = '', viewMode = 'all', displayType = 'chart';
+let deleteTargetId = null, editTargetId = null, deleteTargetIds = [];
+let currentPage = 1, currentHistoryPage = 1;
+const itemsPerPage = 15;
 const PK_CONFIG = {
   tirz: { name: '터제파타이드', halfLife: 5.0, tMax: 1.0 },
   reta: { name: '레타트루타이드', halfLife: 6.0, tMax: 1.5 },
@@ -730,12 +735,12 @@ window.onload = () => {
   // 1. 잔여량 초기화
   doses.forEach(d => { if (!d.id) d.id = Date.now() + Math.random(); });
   setNow(); initDateRange(); update();
-  
+
   // 2. 계산기 로직 바인딩
   setupPillGroup('peptide', 'peptideMg');
   setupPillGroup('water', 'waterMl', updateWaterCc);
   setupPillGroup('dose', 'doseMcg', updateDoseMg);
-  
+
   // 3. 체중 관리 초기화
   setWeightNow(); initWeightDateRange(); loadProfileUI(); updateWeightUI(); setWeightDisplayType('chart');
 };
@@ -756,13 +761,13 @@ function setViewMode(mode) {
   viewMode = mode;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(mode==='all'?'btnAll':(mode==='tirz'?'btnTirz':(mode==='reta'?'btnReta':'btnSema'))).classList.add('active');
-  
+
   const bT = document.getElementById('btnTirz'); const bR = document.getElementById('btnReta'); const bS = document.getElementById('btnSema');
   if(mode==='tirz'){ bT.style.background='#36a2eb'; bT.style.color='white'; } else { bT.style.background='#f8f9fa'; bT.style.color='#36a2eb'; }
   if(mode==='reta'){ bR.style.background='#ff6384'; bR.style.color='white'; } else { bR.style.background='#f8f9fa'; bR.style.color='#ff6384'; }
   if(mode==='sema'){ bS.style.background='#28a745'; bS.style.color='white'; } else { bS.style.background='#f8f9fa'; bS.style.color='#28a745'; }
 
-  currentHistoryPage = 1; update(); 
+  currentHistoryPage = 1; update();
 }
 
 function add() {
@@ -849,7 +854,7 @@ function renderHistoryList() {
     const f = document.getElementById('historyFilter').value;
     const list = doses.filter(d => f === 'all' || d.type === f).reverse();
     const pageList = list.slice((currentHistoryPage-1)*itemsPerPage, currentHistoryPage*itemsPerPage);
-    
+
     pageList.forEach(d => {
         const date = new Date(d.time);
         const dateStr = `${date.getFullYear()}. ${date.getMonth()+1}. ${date.getDate()}. (${['일','월','화','수','목','금','토'][date.getDay()]}) <span style="white-space:nowrap">${date.getHours()>=12?'오후':'오전'} ${date.getHours()%12||12}:${String(date.getMinutes()).padStart(2,'0')}</span>`;
@@ -882,7 +887,7 @@ function renderPagination(id, total, curr, cb) {
 function changeHistoryFilter() { currentHistoryPage = 1; renderHistoryList(); }
 function toggleSelectAll() { const c = document.querySelectorAll('.history-chk'); const all = Array.from(c).every(x=>x.checked); c.forEach(x=>x.checked=!all); }
 function askDel(id) { deleteTargetId = id; deleteTargetIds = []; document.getElementById('singleDelModal').style.display = 'flex'; }
-function askMultiDel() { 
+function askMultiDel() {
     const c = document.querySelectorAll('.history-chk:checked');
     if(!c.length) return alert("삭제할 항목을 선택해주세요.");
     deleteTargetId = null; deleteTargetIds = Array.from(c).map(x=>parseFloat(x.value));
@@ -917,7 +922,7 @@ function saveRecordEdit() {
         sortDoses(); save(); update(); closeRecordEditModal();
     }
 }
-function openResetModal() { 
+function openResetModal() {
     document.getElementById('checkTirz').checked = false; document.getElementById('checkReta').checked = false; document.getElementById('checkSema').checked = false;
     document.getElementById('resetError').style.display = 'none'; document.getElementById('resetModal').style.display = 'flex';
 }
@@ -945,18 +950,18 @@ function drawChart() {
         const d = new Date(t);
         labels.push(`${d.getMonth()+1}.${d.getDate()}`);
         dt.push(calculateTotalLevel(t,'tirz')); dr.push(calculateTotalLevel(t,'reta')); ds.push(calculateTotalLevel(t,'sema'));
-        
+
         const isT = d.toDateString()===todayStr;
         const findDose = (type) => doses.find(x => x.type===type && new Date(x.time).toDateString()===d.toDateString());
         const doT = findDose('tirz'), doR = findDose('reta'), doS = findDose('sema');
-        
+
         if(doT) { prT.push(6); pbT.push('#36a2eb'); lT.push(doT.amt+'mg'); } else if(isT) { prT.push(8); pbT.push('#36a2eb'); lT.push(null); } else { prT.push(0); pbT.push('transparent'); lT.push(null); }
         if(doR) { prR.push(6); pbR.push('#ff6384'); lR.push(doR.amt+'mg'); } else if(isT) { prR.push(8); pbR.push('#ff6384'); lR.push(null); } else { prR.push(0); pbR.push('transparent'); lR.push(null); }
         if(doS) { prS.push(6); pbS.push('#28a745'); lS.push(doS.amt+'mg'); } else if(isT) { prS.push(8); pbS.push('#28a745'); lS.push(null); } else { prS.push(0); pbS.push('transparent'); lS.push(null); }
     }
-    
+
     if(myChart) myChart.destroy();
-    
+
     const datasets = [];
     if(viewMode==='all'||viewMode==='tirz') datasets.push({label:'터제', data:dt, borderColor:'#36a2eb', backgroundColor:'rgba(54,162,235,0.1)', borderWidth:2, tension:0.4, fill:true, pointRadius:prT, pointBackgroundColor:pbT, pointBorderColor:'#fff', pointHoverRadius:6, pointHoverBackgroundColor:'#36a2eb', labelArray:lT, datalabels:{align:'top',anchor:'end',font:{size:10,weight:'bold'},color:'#36a2eb',formatter:(v,c)=>c.dataset.labelArray[c.dataIndex]}});
     if(viewMode==='all'||viewMode==='reta') datasets.push({label:'레타', data:dr, borderColor:'#ff6384', backgroundColor:'rgba(255,99,132,0.1)', borderWidth:2, tension:0.4, fill:true, pointRadius:prR, pointBackgroundColor:pbR, pointBorderColor:'#fff', pointHoverRadius:6, pointHoverBackgroundColor:'#ff6384', labelArray:lR, datalabels:{align:'top',anchor:'end',font:{size:10,weight:'bold'},color:'#ff6384',formatter:(v,c)=>c.dataset.labelArray[c.dataIndex]}});
@@ -966,7 +971,7 @@ function drawChart() {
         type: 'line', data: { labels, datasets },
         options: { responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, scales:{x:{ticks:{autoSkip:true,maxTicksLimit:6}}, y:{beginAtZero:true,title:{display:false},ticks:{padding:10}}}, layout:{padding:{left:10,right:25,top:25,bottom:10}}, plugins:{legend:{display:false}, datalabels:{display:true}, tooltip:{enabled:false, external: customTooltip}} }
     });
-    
+
     function customTooltip(context) {
         const el = document.getElementById('chartTooltip');
         const model = context.tooltip;
@@ -975,7 +980,7 @@ function drawChart() {
              const title = new Date(s + model.dataPoints[0].dataIndex*86400000);
              const dateStr = `${title.getFullYear()}. ${title.getMonth()+1}. ${title.getDate()}.`;
              const isT = title.toDateString() === new Date().toDateString();
-             
+
              let doseHtml = '';
              doses.forEach(d => {
                  if(new Date(d.time).toDateString() === title.toDateString()) {
@@ -1005,7 +1010,7 @@ function renderDailyTable() {
     if(viewMode==='all'||viewMode==='reta') th+='<th style="color:#ff6384">레타</th>';
     if(viewMode==='all'||viewMode==='sema') th+='<th style="color:#28a745">세마</th>';
     thead.innerHTML = th;
-    
+
     const sStr = document.getElementById('searchStart').value;
     const eStr = document.getElementById('searchEnd').value;
     const nowTs = new Date().getTime();
@@ -1016,7 +1021,7 @@ function renderDailyTable() {
     let dateList = []; for(let t=s; t<=e; t+=86400000) dateList.push(t);
     const totalPages = Math.ceil(dateList.length / itemsPerPage);
     if(currentPage>totalPages) currentPage=1;
-    
+
     const pageList = dateList.slice((currentPage-1)*itemsPerPage, currentPage*itemsPerPage);
     const todayStr = new Date().toDateString();
 
@@ -1025,9 +1030,9 @@ function renderDailyTable() {
         const dateStr = `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()} (${['일','월','화','수','목','금','토'][d.getDay()]})`;
         const tr = document.createElement('tr');
         if(d.toDateString() === todayStr) tr.className = 'today-row';
-        
+
         const getBadge = (type) => doses.filter(x => new Date(x.time).toDateString() === d.toDateString() && x.type===type).map(x=>`<span class="dose-badge">💉 ${x.amt}mg</span>`).join('');
-        
+
         let html = `<td class="date-col">${dateStr}</td>`;
         if(viewMode==='all'||viewMode==='tirz') html += `<td class="val-col" style="color:#36a2eb">${calculateTotalLevel(t,'tirz').toFixed(2)}${getBadge('tirz')}</td>`;
         if(viewMode==='all'||viewMode==='reta') html += `<td class="val-col" style="color:#ff6384">${calculateTotalLevel(t,'reta').toFixed(2)}${getBadge('reta')}</td>`;
@@ -1074,28 +1079,28 @@ document.getElementById('calcBtn').addEventListener('click', () => {
     const pMg = parseFloat(document.getElementById('peptideMg').value), wMl = parseFloat(document.getElementById('waterMl').value);
     const dMcg = parseFloat(document.getElementById('doseMcg').value), iCount = parseFloat(document.getElementById('intervalCount').value);
     const iTimes = parseFloat(document.getElementById('intervalTimes').value);
-    
+
     if(!pMg || !wMl || !dMcg || !iCount || !iTimes) { err.innerText = "모든 값을 입력해주세요."; err.style.display='block'; return; }
-    
+
     const concMg = pMg/wMl, concMcg = concMg*1000, vol = dMcg/concMcg, ui = vol*100;
-    
+
     document.getElementById('concMgMl').innerText = `${concMg.toFixed(2)} mg/ml`;
     document.getElementById('concMcgMl').innerText = `${concMcg.toFixed(0)} mcg/ml`;
     document.getElementById('volMl').innerText = `${vol.toFixed(3)} ml`;
     document.getElementById('volCc').innerText = `${vol.toFixed(3)} cc`;
     document.getElementById('uiUnits').innerText = `${ui.toFixed(1)} U`;
-    
+
     const warn = document.getElementById('penWarning');
     if(ui > 60) { warn.style.display='block'; warn.innerText = `⚠️ 60 U 초과 (약 ${Math.ceil(ui/60)}회로 분할 투여)`; }
     else warn.style.display='none';
-    
+
     const totalMcg = pMg*1000, doses = Math.floor(totalMcg/dMcg);
     const unit = document.getElementById('intervalUnit').value === 'day' ? '일' : '주';
     document.getElementById('vialUsage').innerText = `${Math.floor(doses*iCount/iTimes)}${unit}`;
-    
+
     const remain = totalMcg - (doses*dMcg);
     document.getElementById('vialRemain').innerText = remain > 0 ? `(잔여: ${Math.round(remain)} mcg)` : '';
-    
+
     const curr = document.getElementById('currencyUnit').value, price = parseFloat(document.getElementById('peptidePrice').value);
     if(curr && price > 0) {
         const days = unit === 'day' ? iCount : iCount*7;
@@ -1118,13 +1123,13 @@ let userProfile = JSON.parse(localStorage.getItem('user_profile_v1')) || { heigh
 let weightChart;
 const weightCtx = document.getElementById('weightChart').getContext('2d');
 
-let weightDeleteTargetId = null; 
-let weightDeleteTargetIds = []; 
+let weightDeleteTargetId = null;
+let weightDeleteTargetIds = [];
 let weightEditTargetId = null;
 
-let weightDisplayType = 'chart'; 
-let weightDailyPage = 1;      
-let weightHistoryPage = 1;    
+let weightDisplayType = 'chart';
+let weightDailyPage = 1;
+let weightHistoryPage = 1;
 const weightItemsPerPage = 10;
 
 function setWeightNow() {
@@ -1154,7 +1159,7 @@ function setWeightFullRange() {
 }
 
 function searchWeightUpdate() {
-    weightDailyPage = 1; 
+    weightDailyPage = 1;
     updateWeightUI();
 }
 
@@ -1164,7 +1169,7 @@ function setWeightDisplayType(type) {
     document.getElementById('btnWeightShowList').classList.toggle('active', type === 'list');
     document.getElementById('weightChartArea').style.display = type === 'chart' ? 'block' : 'none';
     document.getElementById('weightDailyListArea').style.display = type === 'list' ? 'block' : 'none';
-    
+
     if (type === 'chart' && weightChart) setTimeout(() => weightChart.resize(), 10);
     if (type === 'list') renderWeightDailyTable();
 }
@@ -1180,7 +1185,7 @@ function saveWeightProfile() {
     userProfile.age = document.getElementById('userAge').value;
     userProfile.gender = document.getElementById('userGender').value;
     localStorage.setItem('user_profile_v1', JSON.stringify(userProfile));
-    updateWeightUI(); 
+    updateWeightUI();
 }
 
 function calculateBMI(currentWeight) {
@@ -1231,18 +1236,18 @@ function addWeight() {
     const time = document.getElementById('weightTime').value;
     if(!w || !date || !time) return alert("체중과 날짜를 올바르게 입력해주세요.");
     const ts = new Date(`${date}T${time}`).getTime();
-    
+
     weightData.push({ id: Date.now(), weight: w, time: ts });
-    sortWeightData(); 
+    sortWeightData();
     saveWeight();
     weightDailyPage = 1; weightHistoryPage = 1;
-    setWeightFullRange(); 
-    document.getElementById('weightInput').value = ''; 
+    setWeightFullRange();
+    document.getElementById('weightInput').value = '';
 }
 
 function sortWeightData() {
     weightData.sort((a,b) => {
-        if (a.time === b.time) return a.id - b.id; 
+        if (a.time === b.time) return a.id - b.id;
         return a.time - b.time;
     });
 }
@@ -1288,11 +1293,11 @@ function saveWeightEdit() {
 }
 function openGoalModal() { document.getElementById('goalInput').value = targetWeight||''; document.getElementById('goalModal').style.display = 'flex'; }
 function closeGoalModal() { document.getElementById('goalModal').style.display = 'none'; }
-function saveGoalWeight() { 
-    const val=parseFloat(document.getElementById('goalInput').value); 
-    if(isNaN(val)||val<=0)return alert("올바른 값 입력"); 
-    targetWeight=val; localStorage.setItem('weight_target_v1', targetWeight); 
-    updateWeightUI(); closeGoalModal(); 
+function saveGoalWeight() {
+    const val=parseFloat(document.getElementById('goalInput').value);
+    if(isNaN(val)||val<=0)return alert("올바른 값 입력");
+    targetWeight=val; localStorage.setItem('weight_target_v1', targetWeight);
+    updateWeightUI(); closeGoalModal();
 }
 function openWeightResetModal() { document.getElementById('weightResetModal').style.display = 'flex'; }
 function closeWeightResetModal() { document.getElementById('weightResetModal').style.display = 'none'; }
@@ -1310,7 +1315,7 @@ function updateWeightUI() {
     const current = weightData.length > 0 ? weightData[weightData.length-1].weight : 0;
     document.getElementById('valCurWeight').innerText = current > 0 ? current.toFixed(1) : '--';
     document.getElementById('valGoalWeight').innerText = targetWeight > 0 ? targetWeight.toFixed(1) : '--';
-    
+
     const bmiData = calculateBMI(current);
     document.getElementById('valBMI').innerText = bmiData.bmi;
     document.getElementById('valBMIStatus').innerText = bmiData.status;
@@ -1337,7 +1342,7 @@ function updateWeightUI() {
 
 function drawWeightChart() {
     if(weightChart) weightChart.destroy();
-    const chartData = getDailyLatestData(); 
+    const chartData = getDailyLatestData();
     if (chartData.length === 0) return;
 
     const labels = chartData.map(d => {
@@ -1396,7 +1401,7 @@ function drawWeightChart() {
 
 function renderWeightDailyTable() {
     const tbody = document.getElementById('weightDailyTableBody'); tbody.innerHTML = '';
-    const filteredList = getDailyLatestData().reverse(); 
+    const filteredList = getDailyLatestData().reverse();
     if(filteredList.length === 0) {
         tbody.innerHTML = '<tr><td colspan="2" style="padding:30px; color:#aaa;">해당 기간의 기록이 없습니다.</td></tr>';
         document.getElementById('weightDailyPagination').innerHTML = '';
@@ -1422,7 +1427,7 @@ function renderWeightDailyTable() {
 
 function renderWeightFullHistory() {
     const listEl = document.getElementById('weightFullHistoryList'); listEl.innerHTML = '';
-    const allList = [...weightData].reverse(); 
+    const allList = [...weightData].reverse();
     if(allList.length === 0) {
         listEl.innerHTML = '<div style="text-align:center; padding:30px; color:#aaa;">기록이 없습니다.</div>';
         document.getElementById('weightHistoryPagination').innerHTML = '';
@@ -1436,14 +1441,14 @@ function renderWeightFullHistory() {
         const date = new Date(d.time);
         const dateStr = `${date.getFullYear()}. ${date.getMonth()+1}. ${date.getDate()}. (${['일','월','화','수','목','금','토'][date.getDay()]})`;
         const timeStr = `${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
-        
+
         listEl.innerHTML += `
             <div class="list-item">
                 <div style="display:flex; align-items:center; margin-right:10px;">
                     <input type="checkbox" class="weight-history-chk" value="${d.id}">
                 </div>
                 <div style="flex-grow:1;">
-                    <span class="tag weight">체중</span> 
+                    <span class="tag weight">체중</span>
                     <strong style="font-size:1.1em;">${d.weight} kg</strong>
                     <div style="color:#666; font-size:0.85em; margin-top:4px;">${dateStr} <span style="color:#aaa;">${timeStr}</span></div>
                 </div>
