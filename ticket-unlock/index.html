@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Cache-Control" content="no-store">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https:; img-src 'self' data:; base-uri 'none'; form-action 'none'; object-src 'none'"
+  >
+  <title>희대의돼지 티켓 예매 프로그램 · 휴대폰 원격 잠금 해제</title>
+  <meta
+    name="description"
+    content="휴대폰에서 프로필 잠금번호를 확인하고 실행 중인 PC 프로그램을 일회성으로 잠금 해제합니다."
+  >
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./unlock.js" defer></script>
+</head>
+<body>
+  <main class="unlock-shell">
+    <section class="unlock-card" aria-labelledby="page-title">
+      <div class="brand-row">
+        <span class="brand-mark" aria-hidden="true">희</span>
+        <div>
+          <p class="eyebrow">희대의돼지 티켓 예매 프로그램</p>
+          <h1 id="page-title">휴대폰 원격 잠금 해제</h1>
+        </div>
+      </div>
+
+      <div id="status-panel" class="status-panel status-loading" role="status" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>
+        <div>
+          <strong id="status-title">요청 확인 중</strong>
+          <p id="status-message">보안 요청을 확인하고 있습니다.</p>
+        </div>
+      </div>
+
+      <div id="success-body" class="success-body" hidden>
+        <div class="success-check" aria-hidden="true">✓</div>
+        <h2>이 창을 닫아도 됩니다</h2>
+        <p>
+          잠금번호 원문은 휴대폰 밖으로 전송되지 않았습니다. PC 프로그램의 상태 표시에서
+          잠금 해제 결과를 확인하세요.
+        </p>
+      </div>
+
+      <form id="unlock-form" class="unlock-form" novalidate>
+        <label for="profile-password">프로필 잠금번호</label>
+        <div class="password-wrap">
+          <input
+            id="profile-password"
+            type="password"
+            autocomplete="current-password"
+            inputmode="text"
+            minlength="8"
+            maxlength="64"
+            placeholder="8~64자 잠금번호"
+            aria-describedby="password-help"
+            disabled
+          >
+          <button
+            id="visibility-button"
+            class="visibility-button"
+            type="button"
+            aria-label="잠금번호 표시"
+            disabled
+          >표시</button>
+        </div>
+        <p id="password-help" class="field-help">
+          잠금번호는 이 휴대폰에서만 확인되며, 알림 서버나 이 페이지에 저장되지 않습니다.
+        </p>
+        <button id="unlock-button" class="unlock-button" type="submit" disabled>
+          이 PC 프로그램 잠금 해제
+        </button>
+      </form>
+
+      <div class="security-notes">
+        <h2>안전 확인</h2>
+        <ul>
+          <li>본인이 실행한 PC 프로그램의 ntfy 알림에서만 이 화면을 여세요.</li>
+          <li>요청은 짧은 시간 뒤 만료되고, 한 번 사용하면 다시 사용할 수 없습니다.</li>
+          <li>프로그램이 꺼져 있으면 원격 잠금 해제가 진행되지 않습니다.</li>
+        </ul>
+      </div>
+    </section>
+    <p class="footer-note">개인정보·분석 도구·광고 없이 잠금 해제에 필요한 계산만 수행합니다.</p>
+  </main>
+</body>
+</html>
